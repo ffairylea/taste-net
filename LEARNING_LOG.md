@@ -26,4 +26,8 @@ Math I'm still working through:
 
 ---
 
+## 6th July
+
+First real training run: 279 yes / 187 no images, 89.25% test accuracy. Feature importance surprised me — mostly blue-channel histogram bins, not saturation or brightness like I expected. Makes sense in hindsight: pink images probably have a narrow, consistent blue-channel range, while my "no" set (architecture/food/nature/etc.) has blue scattered everywhere. The model found a real, explainable pattern, not noise.
+
 <!-- Next entry: after real data is collected and first training run -->
