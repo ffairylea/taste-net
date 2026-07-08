@@ -41,11 +41,4 @@ right now," "well-made but not for me." That ambiguity is real and
 it's fine — flag it as a limitation rather than pretending the labels
 are cleaner than they are.
 
-## When you're done
 
-From inside `src/`, run:
-
-```
-pip install -r ../requirements.txt
-python train.py
-```

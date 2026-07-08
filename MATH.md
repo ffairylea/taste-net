@@ -79,9 +79,69 @@ origin (the all-zeros point) — an arbitrary, unhelpful restriction.
 Bias lets the boundary sit wherever the real data actually needs it.
 Weights control the boundary's angle/tilt; bias controls its position.
 
-## Part 3 onward: coming next
-- Why one weighted sum isn't enough (the linear-collapses-to-linear
-  proof, and what non-linearity/ReLU actually buys geometrically)
-- The full forward pass, worked by hand
-- The chain rule, backward pass, and why sigmoid + cross-entropy pair
-  up mathematically
+## Part 3: Why one weighted sum alone isn't enough
+
+Stack two layers that are JUST weighted sums (no ReLU), with real
+numbers: x=2, w1=3, w2=4.
+
+    layer 1: z1 = 2 × 3 = 6
+    layer 2: z2 = 6 × 4 = 24
+
+Could I have gotten 24 directly from x=2 using one single weight,
+skipping layer 1 entirely? Yes: 2 × 12 = 24, and 12 = w1 × w2 (3×4).
+The two layers collapse into exactly one layer with one combined
+weight. Tried it again with different numbers (x=5, w1=2, w2=3) and
+it held: two layers gave 30, one combined layer (5 × 6) also gave 30.
+
+**This always happens with plain multiplication (and addition, with
+messier algebra) — stacking gains nothing if every layer is linear.**
+No matter how many layers I stack, if they're all just weighted sums,
+it's mathematically identical to one single layer.
+
+## What ReLU actually breaks, with real numbers
+
+Same setup, but apply ReLU between layers. x=-4, w1=3:
+
+    z1 = -4 × 3 = -12
+    a1 = ReLU(-12) = max(0, -12) = 0
+    z2 (using a1, w2=5) = 0 × 5 = 0
+
+Now flip x to +4, same weights:
+
+    z1 = 4 × 3 = 12
+    a1 = ReLU(12) = 12  (positive, passes through unchanged)
+    z2 = 12 × 5 = 60
+
+Flipping the sign of x took the output from 0 to 60 — not a simple
+proportional relationship. That asymmetry (one side gets crushed to
+zero, the other doesn't) is exactly what makes this non-linear, and
+it's specifically because ReLU treats positive and negative
+differently. No single weight can reproduce "zero for negative input,
+scaled for positive input" — that shape genuinely requires the
+layered, non-linear structure.
+
+## Why kill negatives and keep positives — what this represents
+
+Think of each hidden neuron as a **detector for one specific pattern**
+— say, hypothetically, one neuron ends up detecting "warm + low blue,"
+roughly my pink signature. When an image strongly matches, z comes
+out positive and large: "yes, I'm detecting my pattern strongly here."
+When an image doesn't match — or is the opposite (cool, high blue) —
+z comes out negative, and ReLU says: contribute *nothing* to the final
+decision, don't report a negative amount.
+
+It doesn't really make sense to ask "how much *negative* pink did this
+neuron detect" — either the pattern is present (pass the signal on) or
+it isn't (pass along silence). ReLU encodes exactly that: no such
+thing as negative contribution for one specific narrow pattern.
+
+**The neuroplasticity/RAS connection I keep coming back to:** this
+is structurally similar to how real neurons work — fire (send a
+signal, roughly proportional to how strongly driven) past a
+threshold, or stay silent below it. No such thing as a real neuron
+firing "backward." ReLU is a simplified cartoon of exactly that idea.
+Worth being honest about where the metaphor breaks though: real
+neurons integrate signals over time, have refractory periods, use
+different neurotransmitters with different effects — nothing as
+clean as max(0,z). ReLU borrows the *shape* of all-or-nothing,
+threshold-based firing, without claiming to simulate actual biology.

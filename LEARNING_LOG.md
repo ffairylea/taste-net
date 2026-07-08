@@ -48,4 +48,8 @@ has something like a reticular activating system. Learned this maps to
 real "attention mechanisms" in ML, which I'd essentially reinvented the
 need for without knowing the name.
 
-<!-- Next entry: after real data is collected and first training run -->
+---
+
+## 8 Jul 2026
+
+partial derivatives — same rules as derivatives which I'm already familiar with, just freezing other variables; backward pass through W2 clicked with real numbers
