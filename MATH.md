@@ -145,3 +145,55 @@ neurons integrate signals over time, have refractory periods, use
 different neurotransmitters with different effects — nothing as
 clean as max(0,z). ReLU borrows the *shape* of all-or-nothing,
 threshold-based firing, without claiming to simulate actual biology.
+
+## Part 4: Deriving sigmoid's own derivative
+
+We've been using σ'(z) = σ(z)(1-σ(z)) as a fact. Here's where it
+actually comes from.
+
+σ(z) = 1/(1+e^-z), rewritten as (1+e^-z)^-1 so chain rule + power
+rule apply.
+
+Outer function: u^-1, derivative -u^-2. Inner: u = 1+e^-z, derivative
+-e^-z. Multiply:
+
+    σ'(z) = -u^-2 × (-e^-z) = e^-z / (1+e^-z)^2
+
+Rewrite in terms of σ(z) itself: split into two fractions,
+
+    e^-z / (1+e^-z)^2 = [1/(1+e^-z)] × [e^-z/(1+e^-z)]
+
+First fraction is σ(z). Second fraction, add/subtract 1 in numerator:
+
+    e^-z/(1+e^-z) = [(1+e^-z) - 1]/(1+e^-z) = 1 - σ(z)
+
+So: σ'(z) = σ(z) × (1-σ(z))
+
+Checked with real numbers: σ(0.272) ≈ 0.568, so
+σ'(0.272) = 0.568 × 0.432 ≈ 0.2454
+
+This is maximized (0.25) when σ(z)=0.5 (z=0) — sigmoid's steepest
+point — and shrinks toward 0 as σ(z) approaches 0 or 1 (confident
+predictions). This formula is the literal mathematical reason sigmoid
+"goes flat" at extremes, not just a visual description.
+
+## Why we even need this derivative — the actual reason, not just curiosity
+
+We want ∂L/∂z2 (how loss changes if z2 changes) to know how to correct
+the weights that produced z2. But L doesn't touch z2 directly — only
+through ŷ (since ŷ = σ(z2)). Chain rule:
+
+    ∂L/∂z2 = (∂L/∂ŷ) × (∂ŷ/∂z2)
+
+That second piece IS sigmoid's derivative — since ŷ = σ(z2), "how ŷ
+changes as z2 changes" is exactly asking for σ'(z2). This isn't
+curiosity about probability — it's a required link letting the chain
+rule hop backward past the sigmoid step, converting "loss's
+sensitivity to the prediction" into "loss's sensitivity to the raw
+score."
+
+(Side note: for THIS specific sigmoid+cross-entropy pairing, this
+derivative ends up canceling away in the combined formula — see the
+∂L/∂z2 = ŷ-y result. But it's still needed standalone to verify that
+cancellation is real, and it's necessary for layer 1's ReLU step,
+which doesn't get this convenient cancellation.)
