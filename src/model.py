@@ -81,14 +81,33 @@ class TasteNet:
         X, Z1, A1, Z2, A2 = cache
         n = X.shape[0]
 
-        # dLoss/dZ2: for sigmoid + cross-entropy together, this
-        # simplifies beautifully to (prediction - truth).
+        # dLoss/dZ2 — see MATH.md Part 5 for the full derivation.
+        # This is NOT a shortcut — it's the actual result of
+        # multiplying cross-entropy's derivative (dL/dŷ) by
+        # sigmoid's derivative (dŷ/dZ2), which algebraically cancels
+        # down to this simple subtraction. Verified by hand with real
+        # numbers in MATH.md.
         dZ2 = (A2 - y_true).reshape(-1, 1)
+
+        # dLoss/dW2 = (what fed into W2) × (how wrong Z2 was).
+        # See MATH.md Part 2/Part 5 — W2's "blame" scales with how
+        # much its input (A1) actually contributed.
         dW2 = A1.T @ dZ2 / n
         db2 = dZ2.mean(axis=0)
 
+        # Push the error backward through the hidden layer.
+        # dA1 = how much this hidden neuron's output contributed
+        # to the final error (chain rule, one hop back through W2).
         dA1 = dZ2 @ self.W2.T
+
+        # Multiply by ReLU's derivative: exactly 1 if this neuron
+        # fired (Z1 > 0), exactly 0 if it didn't. See MATH.md Part 3 —
+        # this is why a "dead" neuron (Z1 <= 0) gets ZERO gradient
+        # here, no partial credit, unlike sigmoid's smooth derivative.
         dZ1 = dA1 * relu_derivative(Z1)
+
+        # Same pattern as dW2: (what fed in) × (how wrong this layer's
+        # pre-activation was).
         dW1 = X.T @ dZ1 / n
         db1 = dZ1.mean(axis=0)
 

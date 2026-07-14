@@ -135,7 +135,7 @@ neuron detect" — either the pattern is present (pass the signal on) or
 it isn't (pass along silence). ReLU encodes exactly that: no such
 thing as negative contribution for one specific narrow pattern.
 
-**The neuroplasticity/RAS connection I keep coming back to:** this
+**The neuroplasticity/RAS connection:** this
 is structurally similar to how real neurons work — fire (send a
 signal, roughly proportional to how strongly driven) past a
 threshold, or stay silent below it. No such thing as a real neuron
@@ -197,3 +197,32 @@ derivative ends up canceling away in the combined formula — see the
 ∂L/∂z2 = ŷ-y result. But it's still needed standalone to verify that
 cancellation is real, and it's necessary for layer 1's ReLU step,
 which doesn't get this convenient cancellation.)
+
+
+## Part 5: The full cancellation proof, verified with real numbers
+
+Piece 1 — cross-entropy's derivative w.r.t. ŷ:
+
+    ∂L/∂ŷ = -[y/ŷ - (1-y)/(1-ŷ)]
+
+Plug in y=1, ŷ=0.568:
+
+    ∂L/∂ŷ = -[1/0.568 - 0/0.432] = -1.7606
+
+Piece 2 — sigmoid's derivative (derived in Part 4):
+
+    ∂ŷ/∂z2 = σ(z2)(1-σ(z2)) = 0.568 × 0.432 = 0.2454
+
+Multiply (chain rule):
+
+    ∂L/∂z2 = (-1.7606) × (0.2454) ≈ -0.432
+
+Compare to the "shortcut" formula ŷ - y = 0.568 - 1 = -0.432.
+
+They match exactly — not a coincidence, this is the actual algebraic
+cancellation happening, verified numerically rather than just
+asserted. The messy 1/ŷ and ŷ(1-ŷ) terms combine and simplify to a
+plain subtraction. This is why `model.py`'s backward() function can
+just write `dZ2 = A2 - y_true` — that one line already has this
+entire cancellation baked in, and I now know exactly why it's allowed
+to be that short.

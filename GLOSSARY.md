@@ -1,7 +1,5 @@
 # Glossary
 
-Terms explained in my own words as I understood them, not copied from a textbook.
-
 **Layer** — a group of "neurons" that process the input together before passing results to the next group. My network has 2 layers: one hidden layer, one output layer.
 
 **Weight (W)** — a number that decides how much a specific input feature matters to the decision, and in which direction (positive = pushes toward "yes," negative = pushes toward "no"). Not set by me — learned automatically during training.
