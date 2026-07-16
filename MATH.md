@@ -1,33 +1,19 @@
-*I'm building this documentation to prove I actually understand the
-math, not just copy-pasted code. I worked through this with an AI
-tutor across multiple sessions, asking it to slow down and re-explain
-with real numbers whenever a symbol-based explanation didn't click.
-The confusion and mistakes are documented honestly in LEARNING_LOG.md.
+*I'm building this documentation to prove I actually understand the math, not just copy-pasted code. I worked through this with an AI tutor across multiple sessions, asking it to slow down and re-explain.
+
 
 ## Part 1: What is the input, actually?
 
-An image starts as a giant grid of pixel numbers — way too many
-(12,000+) to learn from directly with only ~450 images. So
-`features.py` compresses each image down into just 29 numbers:
-brightness, saturation, warmth, color histogram bins, etc. Every one
-of these is a real, hand-computable statistic — e.g. saturation for
-one pixel is (max(R,G,B) - min(R,G,B)) / max(R,G,B), averaged across
-the whole image.
+An image starts as a giant grid of pixel numbers — way too many (12,000+) to learn from directly with only ~450 images. So `features.py` compresses each image down into just 29 numbers: brightness, saturation, warmth, color histogram bins, etc. Every one of these is a real, hand-computable statistic — e.g. saturation for one pixel is (max(R,G,B) - min(R,G,B)) / max(R,G,B), averaged across the whole image.
 
-This list of 29 numbers is called a **feature vector**. Think of it
-as one point in a 29-dimensional space — same idea as a point (x, y)
-on a 2D graph, just with 29 coordinates instead of 2.
+This list of 29 numbers is called a **feature vector**. Think of it as one point in a 29-dimensional space — same idea as a point (x, y) on a 2D graph, just with 29 coordinates instead of 2.
 
-**Why this matters:** the entire project rests on one geometric bet —
-if my real "yes" (pink board) images cluster together in one region
-of this 29D space, and "no" images cluster somewhere else, then a
-model just needs to find a boundary separating those two regions.
+**Why this matters:** the entire project rests on one geometric bet — if my real "yes" (pink board) images cluster together in one region
+of this 29D space, and "no" images cluster somewhere else, then a model just needs to find a boundary separating those two regions.
 Everything below exists purely to find that boundary.
 
 ## Part 2: What does one neuron actually compute?
 
-A neuron takes in numbers and produces one number out, using a
-**weighted sum**. Worked with real numbers first:
+A neuron takes in numbers and produces one number out, using a **weighted sum** (w). Worked with real numbers first:
 
 Say for one photo: warmth = 0.6, saturation = 0.2 (simplified to just
 2 features here, instead of the real 29, to keep this readable).
@@ -58,21 +44,28 @@ start as small random numbers, then get automatically adjusted by
 training (gradient descent) based on what reduces error on my real
 labeled images.
 
+**The 8 Neurons**
+Why 8? 
+8 is an arbitrary choice, not derived from some formula. I picked a reasonable-sized number for a small dataset. There's no rule saying "8 is correct" — I could try 4, 16, 32 and get different results (this is actually a great, easy experiment for my project: does accuracy change if I try different n_hidden values?). More neurons = more capacity to detect complex patterns, but also more risk of overfitting with limited data (~450 images). 8 is a reasonable middle-ground guess for this data size, not a mathematically proven optimum.
+
+What does eaach neuron do?
+Every single hidden neuron sees all 29 input features. What actually differs between the 8 neurons is their weights — each neuron has its own separate set of 29 weights (one weight per feature) plus its own bias. So neuron 1 might have learned weights that heavily emphasize blue-histogram bins and barely care about brightness; neuron 2 might have learned the opposite emphasis. Same 29 inputs going in everywhere, but 8 different "opinions" coming out, because each neuron combines those same 29 numbers differently.
+Concretely, in my actual code — look at W1 in model.py:
+pythonself.W1 = rng.normal(0, 0.5, size=(n_features, n_hidden))
+This shape is (29, 8) — 29 rows (one per feature), 8 columns (one per hidden neuron). Column 1 = neuron 1's personal set of 29 weights. Column 2 = neuron 2's completely separate set of 29 weights. Same input matrix multiplies against all 8 columns simultaneously (that's what the matrix multiplication X @ W1 does) — producing 8 different z1​ values, one per neuron, from the exact same 29 inputs.
+
+Why is this useful, rather than each neuron only seeing a slice of features? 
+Because interesting patterns often require combinations across many features at once — e.g., "warm and low-blue-bin-6 and not-too-saturated" might be the real pink signature, and a single neuron needs access to all three of those simultaneously to detect that specific combination. If neurons only saw isolated slices, they could never learn cross-feature relationships like that.
+
+
 ## Part 2.5: Why do we even add a bias?
 
-Without b, z = xW forces z to be exactly 0 whenever every input is 0
-(e.g. an imaginary all-black, featureless image) — no matter what the
-weights are. The model would have zero flexibility to say "even for a
+Without b, z = xW forces z to be exactly 0 whenever every input is 0 (e.g. an imaginary all-black, featureless image) — no matter what the weights are. The model would have zero flexibility to say "even for a
 neutral input, I still lean toward yes/no."
 
-Adding a bias, e.g. b = 2, means even with all-zero inputs, z = 2 —
-letting the model encode a baseline tendency independent of the
-specific input. Concretely: if the vast majority of my real pins skew
-warm-toned in general, a learned bias might end up positive, encoding
-"lean toward yes by default, only overturn that if features strongly
-say otherwise."
+Adding a bias, e.g. b = 2, means even with all-zero inputs, z = 2 — letting the model encode a baseline tendency independent of the specific input. Concretely: if the vast majority of my real pins skew warm-toned in general, a learned bias might end up positive, encoding "lean toward yes by default, only overturn that if features strongly say otherwise."
 
-Geometrically (tying back to Part 1): the model's job is finding a
+Geometrically: the model's job is finding a
 boundary line separating yes-points from no-points in feature space.
 Without bias, that boundary is forced to pass through the exact
 origin (the all-zeros point) — an arbitrary, unhelpful restriction.
@@ -90,13 +83,21 @@ numbers: x=2, w1=3, w2=4.
 Could I have gotten 24 directly from x=2 using one single weight,
 skipping layer 1 entirely? Yes: 2 × 12 = 24, and 12 = w1 × w2 (3×4).
 The two layers collapse into exactly one layer with one combined
-weight. Tried it again with different numbers (x=5, w1=2, w2=3) and
-it held: two layers gave 30, one combined layer (5 × 6) also gave 30.
+weight. 
 
 **This always happens with plain multiplication (and addition, with
 messier algebra) — stacking gains nothing if every layer is linear.**
 No matter how many layers I stack, if they're all just weighted sums,
 it's mathematically identical to one single layer.
+
+## What is ReLU?
+
+ReLU stands for "Rectified Linear Unit" — 
+it's the simplest possible function: ReLU(z) = max(0, z). If z is
+positive, output z unchanged. If z is negative, output 0 instead.
+It's applied to every hidden
+neuron's z value, right after the weighted sum, before passing the
+result to the next layer.
 
 ## What ReLU actually breaks, with real numbers
 
@@ -135,8 +136,8 @@ neuron detect" — either the pattern is present (pass the signal on) or
 it isn't (pass along silence). ReLU encodes exactly that: no such
 thing as negative contribution for one specific narrow pattern.
 
-**The neuroplasticity/RAS connection:** this
-is structurally similar to how real neurons work — fire (send a
+**The neuroplasticity connection:** 
+this is structurally similar to how real neurons work — fire (send a
 signal, roughly proportional to how strongly driven) past a
 threshold, or stay silent below it. No such thing as a real neuron
 firing "backward." ReLU is a simplified cartoon of exactly that idea.
@@ -148,8 +149,19 @@ threshold-based firing, without claiming to simulate actual biology.
 
 ## Part 4: Deriving sigmoid's own derivative
 
+## What is sigmoid?
+it's formula: σ(z) = 1 / (1 + e^-z)
+
+It takes any real number (positive, negative, huge, tiny) and
+squashes it into a value strictly between 0 and 1 — so it can be
+read as a probability. We use it **only** at the very last layer, after
+combining all the hidden neurons together into one final z2, because
+that's the one place we need an actual "how confident" number, not
+just an internal detector value. It came from inverting the log-odds
+formula.
+
 We've been using σ'(z) = σ(z)(1-σ(z)) as a fact. Here's where it
-actually comes from.
+actually comes from since we covered derivatives in highschool :).
 
 σ(z) = 1/(1+e^-z), rewritten as (1+e^-z)^-1 so chain rule + power
 rule apply.
