@@ -160,8 +160,11 @@ that's the one place we need an actual "how confident" number, not
 just an internal detector value. It came from inverting the log-odds
 formula.
 
-We've been using σ'(z) = σ(z)(1-σ(z)) as a fact. Here's where it
-actually comes from since we covered derivatives in highschool :).
+We will be using the fact that σ'(z) = σ(z)(1-σ(z)) already — 
+specifically, this formula is needed to compute ∂ŷ/∂z2. 
+
+Here's where it
+actually comes from:
 
 σ(z) = 1/(1+e^-z), rewritten as (1+e^-z)^-1 so chain rule + power
 rule apply.
@@ -181,8 +184,6 @@ First fraction is σ(z). Second fraction, add/subtract 1 in numerator:
 
 So: σ'(z) = σ(z) × (1-σ(z))
 
-Checked with real numbers: σ(0.272) ≈ 0.568, so
-σ'(0.272) = 0.568 × 0.432 ≈ 0.2454
 
 This is maximized (0.25) when σ(z)=0.5 (z=0) — sigmoid's steepest
 point — and shrinks toward 0 as σ(z) approaches 0 or 1 (confident
@@ -197,21 +198,83 @@ through ŷ (since ŷ = σ(z2)). Chain rule:
 
     ∂L/∂z2 = (∂L/∂ŷ) × (∂ŷ/∂z2)
 
+((y = the true label — a known fact, not computed. It's 1 if the image was really from your data/yes folder, 0 if from data/no. Fixed, given, never changes during the forward/backward pass.
+y^\hat y
+y^​ ("y-hat") = the model's prediction — its guess, a number between 0 and 1 (like 0.568), representing "how confident the model is that this is a yes." This is what gets computed (via σ(z2)\sigma(z_2)
+σ(z2​)), and it's what we compare against the true yy
+y to figure out how wrong the model was.))
+
 That second piece IS sigmoid's derivative — since ŷ = σ(z2), "how ŷ
-changes as z2 changes" is exactly asking for σ'(z2). This isn't
-curiosity about probability — it's a required link letting the chain
-rule hop backward past the sigmoid step, converting "loss's
-sensitivity to the prediction" into "loss's sensitivity to the raw
+changes as z2 changes" is exactly asking for σ'(z2). It's a required link letting the chain
+rule hop backward past the sigmoid step, converting "loss'
+sensitivity to the prediction" into "loss' sensitivity to the raw
 score."
 
-(Side note: for THIS specific sigmoid+cross-entropy pairing, this
+(Side note: for this specific sigmoid+cross-entropy pairing, this
 derivative ends up canceling away in the combined formula — see the
 ∂L/∂z2 = ŷ-y result. But it's still needed standalone to verify that
 cancellation is real, and it's necessary for layer 1's ReLU step,
 which doesn't get this convenient cancellation.)
 
+## Where sigmoid's formula actually comes from (log-odds)
 
-## Part 5: The full cancellation proof, verified with real numbers
+Start with what we need: a way to represent a probability p (between
+0 and 1) using a raw score that can be any real number — since z = xW+b
+can come out as anything, positive or negative, huge or tiny.
+
+Take the "odds" of p: odds = p / (1-p). This ranges from 0 (impossible)
+to infinity (certain) — better than plain probability, but still
+can't go negative.
+
+Take the natural log of the odds — called "log-odds" or "logit":
+
+    z = log(p / (1-p))
+
+Now z can be ANY real number: as p approaches 0, log-odds goes to
+negative infinity; as p approaches 1, log-odds goes to positive
+infinity. This finally matches what z = xW+b can naturally produce.
+
+Sigmoid is just this equation solved backwards — given z, get back p.
+Algebra:
+
+    z = log(p/(1-p))
+    e^z = p/(1-p)
+    e^z (1-p) = p
+    e^z = p + p*e^z
+    e^z = p(1+e^z)
+    p = e^z / (1+e^z)
+
+Multiply top and bottom by e^-z:
+
+    p = 1 / (e^-z + 1) = 1 / (1+e^-z)
+
+That's sigmoid. It's not an arbitrary S-shaped curve — it's the exact
+algebraic inverse of the log-odds function, which is the natural
+bridge between "any real number" (what linear math produces) and "a
+valid probability" (what we actually need).
+
+## Part 5: The full cancellation proof
+
+## Cross-entropy loss:
+
+L = -[y·log(ŷ) + (1-y)·log(1-ŷ)]
+
+Since y is always exactly 0 or 1, only ONE of the two terms is ever
+active per example — the other multiplies by 0 and disappears:
+- If y=1: L = -log(ŷ)
+- If y=0: L = -log(1-ŷ)
+
+Why this specific formula, not something simpler like (ŷ-y)²
+(mean squared error)? Because log(x) shoots toward -∞ as x approaches
+0 — so this loss punishes CONFIDENT WRONG answers dramatically harder
+than uncertain ones. Example: if y=1 and the model confidently (and
+wrongly) guesses ŷ=0.01, L = -log(0.01) ≈ 4.6. If it guesses a less
+confident ŷ=0.3, L = -log(0.3) ≈ 1.2 — nearly 4x smaller, even though
+both were "wrong." This steep penalty for confident mistakes is
+specifically what we want for a yes/no classifier, and it's why
+cross-entropy is the standard choice for this kind of problem
+(mean-squared-error is the right tool for predicting continuous
+numbers instead, like temperature — not what we're doing here).
 
 Piece 1 — cross-entropy's derivative w.r.t. ŷ:
 
@@ -231,10 +294,81 @@ Multiply (chain rule):
 
 Compare to the "shortcut" formula ŷ - y = 0.568 - 1 = -0.432.
 
-They match exactly — not a coincidence, this is the actual algebraic
-cancellation happening, verified numerically rather than just
-asserted. The messy 1/ŷ and ŷ(1-ŷ) terms combine and simplify to a
+They match exactly — this is the actual algebraic
+cancellation happening, verified numerically. The messy 1/ŷ and ŷ(1-ŷ) terms combine and simplify to a
 plain subtraction. This is why `model.py`'s backward() function can
 just write `dZ2 = A2 - y_true` — that one line already has this
-entire cancellation baked in, and I now know exactly why it's allowed
-to be that short.
+entire cancellation baked in.
+
+## Part 6: W1's gradient — the mirror image of W2's
+
+We want dZ1 (written ∂L/∂z1) — this asks the same kind of question
+as the derivatives before: "how does loss change if z1 (the hidden
+neuron's raw score, before ReLU) nudges up slightly?" We need this
+because z1 was produced by W1, and we want to know which direction to
+correct W1.
+
+Quick reminder on "gradient": every ∂L/∂(something) calculation in
+this document is a gradient — a single number telling us whether that
+parameter is currently too high or too low (the sign) and roughly by
+how much (the size). "Gradient descent" just means: take these
+gradients, nudge every weight a small step in the direction that
+reduces loss.
+
+L doesn't touch z1 directly — only through a1 (since a1 = ReLU(z1)).
+So by chain rule, we go through that middleman: first "how does loss
+change with a1" (pushed back from the layer above), then "how does a1
+change with z1" (ReLU's own derivative), and multiply these two
+sensitivities together — same logic as combining sigmoid's derivative
+with cross-entropy's derivative in Part 5, just one layer earlier.
+
+    ∂L/∂a1 = (∂L/∂z2) × W2 = (-0.432)(0.8) = -0.3456
+
+Then multiply by ReLU's derivative. Since z1 = 0.34 > 0, this neuron
+fired, so ReLU'(z1) = 1 — gradient passes through completely
+unchanged:
+
+    ∂L/∂z1 = -0.3456 × 1 = -0.3456
+
+(If z1 had been negative instead, ReLU'(z1) = 0, and this whole
+gradient would become exactly 0 — the neuron gets zero blame, zero
+learning signal, since it contributed nothing to begin with. This is
+why we multiply here: chain rule combines sensitivities
+across a chain of dependencies by multiplying, one hop at a time.)
+
+Now W1's gradient itself, same pattern as W2's — multiply "how wrong
+z1 was" by "what fed into it" (the original inputs x):
+
+    ∂L/∂W1 = x × (∂L/∂z1) = [0.6, 0.2] × (-0.3456) = [-0.2074, -0.0691]
+
+Two numbers, one per input feature, since W1 has one weight per
+feature feeding into this neuron.
+
+## Part 7: Actually updating the weights (gradient descent)
+
+Gradient descent rule: W ← W - lr × gradient. Using learning rate 0.1:
+
+    W2_new = 0.8 - (0.1)(-0.14688) = 0.81469
+    W1_new = [0.5, -0.3] - (0.1)[-0.2074, -0.0691] = [0.5207, -0.2931]
+
+Sanity check: W2 went UP slightly (0.8 → 0.8147). True label was
+"yes" and the model wasn't confident enough (only 56.8%), so
+increasing W2 pushes future predictions on similar inputs higher —
+exactly the right direction. Both W1 values also shifted in the
+direction that would make z1 (and downstream, a1, z2, ŷ) larger next time — the whole system consistently correcting itself toward the true answer, in one small step.
+
+## Part 8: What this one example actually represents
+
+Everything above — Parts 2 through 7 — is one single training step,
+for one image, computed entirely by hand. My actual train.py does
+this exact same sequence of calculations, automatically, for every
+image in the training set, repeated 500 times (epochs). Nothing about
+the real training loop is conceptually different from what's above —
+it's the same forward pass, same loss calculation, same backward
+pass, same weight update — just scaled up from 1 neuron and 2 features to 8 neurons and 29 real features, and repeated many times
+instead of once.
+
+The loss curve I saw when running train.py (starting around 0.86,
+ending near 0.21) is literally thousands of repetitions of the single
+correction shown above, each one nudging the weights a tiny bit
+closer to correctly separating my real "yes" and "no" images.
