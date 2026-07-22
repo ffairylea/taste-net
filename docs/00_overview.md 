@@ -1,0 +1,26 @@
+# taste-net — documentation overview
+
+This is a small neural network, built entirely from raw numpy (no
+PyTorch, no scikit-learn), trained to predict whether I would save
+an image, using only my own labeled Pinterest data.
+
+I built this to actually understand what's happening inside tools
+like sentence-transformers, which I used in an earlier project
+(chaos-organizer) without knowing the math underneath. Every file
+here documents that understanding, built from scratch, in my own
+words — worked through with an AI tutor across multiple sessions,
+re-explained slowly wherever I got confused.
+
+## How to read this
+
+Go through the files in order — each one builds on the last:
+
+1. **01_the_data.md** — how an image becomes 29 numbers
+2. **02_neurons_and_layers.md** — the basic vocabulary
+3. **03_the_weighted_sum.md** — how one neuron computes a score
+4. **04_nonlinearity.md** — why one weighted sum alone isn't enough
+5. **05_sigmoid.md** — turning a raw score into a probability
+6. **06_loss_function.md** — measuring how wrong a prediction was
+7. **07_backward_pass.md** — how the model corrects itself
+8. **08_matrix_multiplication.md** — how this scales to real data
+9. **glossary.md** — quick symbol lookup, once terms are familiar
