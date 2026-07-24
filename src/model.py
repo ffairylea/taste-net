@@ -1,20 +1,9 @@
 """
 model.py
-
-A small neural network, built from raw numpy. No PyTorch, no
-TensorFlow, no sklearn. Every piece of math here is math YOU
-are responsible for understanding — that's the entire point of
-this project.
-
-Architecture: input features -> hidden layer -> 1 output (probability)
-This is the simplest possible "deep" network: one hidden layer.
-Whether the hidden layer is even NECESSARY (vs. a single linear
-layer = logistic regression) is itself one of the interesting
-questions this project can answer about your data.
+A small neural network, built from raw numpy. 
 """
 
 import numpy as np
-
 
 def sigmoid(z):
     """Squashes any real number into (0, 1) - turns a raw score
@@ -25,9 +14,9 @@ def sigmoid(z):
 
 
 def sigmoid_derivative(a):
-    """Derivative of sigmoid, expressed in terms of its OWN output.
+    """Derivative of sigmoid, expressed in terms of its own output.
     This identity (a * (1-a)) is why sigmoid is convenient for
-    backprop by hand - you don't need to recompute from scratch."""
+    backprop by hand."""
     return a * (1 - a)
 
 
@@ -66,7 +55,7 @@ class TasteNet:
 
     def compute_loss(self, y_true, y_pred):
         """Binary cross-entropy: the standard loss for yes/no
-        classification. Penalizes confident WRONG predictions
+        classification. Penalizes confident wrong predictions
         much more heavily than uncertain ones.
         loss = -[y*log(p) + (1-y)*log(1-p)], averaged over samples."""
         eps = 1e-8  # avoid log(0)
@@ -76,17 +65,16 @@ class TasteNet:
     def backward(self, y_true, cache):
         """Backpropagation, by hand: the chain rule applied layer by
         layer, from the loss back to every weight.
-        This is THE core calculus of the whole project - gradients
+        This is the core calculus of the whole project - gradients
         tell us which direction to nudge each weight to reduce loss."""
         X, Z1, A1, Z2, A2 = cache
         n = X.shape[0]
 
         # dLoss/dZ2 — see MATH.md Part 5 for the full derivation.
-        # This is NOT a shortcut — it's the actual result of
+        # This is not a shortcut — it's the actual result of
         # multiplying cross-entropy's derivative (dL/dŷ) by
         # sigmoid's derivative (dŷ/dZ2), which algebraically cancels
-        # down to this simple subtraction. Verified by hand with real
-        # numbers in MATH.md.
+        # down to this simple subtraction. 
         dZ2 = (A2 - y_true).reshape(-1, 1)
 
         # dLoss/dW2 = (what fed into W2) × (how wrong Z2 was).
