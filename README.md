@@ -1,7 +1,7 @@
 # taste-net
 
 A small neural network, built entirely from raw numpy (no PyTorch,
-no scikit-learn), trained to predict whether *I* would save an image
+no scikit-learn), trained to predict whether I would save an image
 — using only my own labeled Pinterest-style data.
 
 This isn't trying to solve "aesthetics" or build a general taste
@@ -17,7 +17,7 @@ project is the opposite move: build the smallest honest version of
 "a model that learns preference" myself, from the math up, so I
 actually understand what a library like that is doing when I use one.
 
-No pretrained embeddings, no CLIP, no transfer learning. Every
+No pretrained embeddings, no clip, no transfer learning. Every
 feature the model sees is a number I computed by hand (see
 `src/features.py`) — brightness, saturation, contrast, color
 histograms. Every step of learning is backpropagation and gradient
@@ -43,10 +43,24 @@ descent I wrote myself (see `src/model.py`).
 - [x] Feature extraction pipeline
 - [x] From-scratch neural net (forward + backward pass, by hand)
 - [x] Training loop with train/test split
-- [ ] Real labeled data collected (see `LABELING_GUIDE.md`)
-- [ ] Results + write-up
+- [x] Real labeled data collected (279 "yes" images from my pink
+      Pinterest board, 187 "no" images from Unsplash — see
+      `LABELING_GUIDE.md`)
+- [x] First real training run: 89.25% test accuracy. Feature
+      importance analysis showed the model leans heavily on
+      blue-channel histogram bins, likely reflecting my pink
+      aesthetic's narrow blue-channel signature
+- [x] Full math documentation, restructured into sequenced files
+      under `docs/` — from-scratch derivations of weighted sums,
+      non-linearity, sigmoid (including the log-odds derivation),
+      cross-entropy, and the complete backward pass, worked by hand
+      with real numbers
+- [ ] Ablation test: does removing blue-channel features tank
+      accuracy, or is the model using more than just that shortcut?
 - [ ] Comparison against a real pretrained model (e.g. CLIP) as a
       "how much am I losing by not using a real vision model" baseline
+- [ ] Multi-board classification (softmax) — predicting which board
+      an image belongs to, not just yes/no for one board
 
 ## The uncomfortable question this project doesn't dodge
 
