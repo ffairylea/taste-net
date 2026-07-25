@@ -68,3 +68,59 @@ own labeled behavior predict more of my own behavior. Whether that
 constitutes "taste" in any meaningful sense — versus just curve-fitting
 to a moving target — is a question I'm leaving open on purpose, not
 one I think a 29-feature numpy model is positioned to settle.
+
+
+## Open questions I don't have answers to, but want on record
+
+A few bigger questions this project brushed up against, worth
+writing down honestly rather than letting them evaporate. I don't
+think taste-net, at its current scale, can answer most of these —
+but building even this small, simple model made them feel concrete
+to me instead of abstract.
+
+### Can a model go beyond what I explicitly gave it?
+
+Not "does it have opinions" — but genuinely: if I feed it images it
+has never seen, from a source totally outside my training data, does
+it correctly generalize to my taste, or does it only work on things
+close to what it already saw? This is actually testable at my
+project's scale (a real experiment, not just a philosophical
+question) — feed it unseen images from a different source entirely
+and see what happens. Partial answer, to be filled in once I run it:
+[pending].
+
+### Could something like this "turn bad" without bad input?
+
+For a model this narrow (predicting a single number from 29
+features, no actions, no persistence, no goals), the honest answer
+is no — there's no mechanism here for anything beyond outputting a
+probability. This isn't a deep claim about AI safety in general,
+just an honest, structural fact about what this specific,
+simple architecture can and can't do.
+
+### The bigger, unresolved version of this question
+
+What I'm actually curious about — whether more complex systems can
+develop behavior or internal representations that weren't directly
+specified by training, and whether "accountability" cleanly stays
+with the human designer as systems get more complex — is a real,
+active, unresolved area of AI research (alignment and
+interpretability). It's not something resolvable at my project's
+scale, and it's not something even current professional researchers
+have fully settled either. I don't think it's my place to claim an
+answer here. I think it's worth being honest that the question
+exists, that it's bigger than this project, and that this project is
+the first time it stopped feeling abstract to me.
+
+### Can AI have "taste," in any real sense?
+
+I don't think this project answers that (see the earlier section on
+preference vs. taste). But building it made the question sharper: a
+model trained only on my past choices can, at most, mirror what I
+already like. It has no equivalent of the emotional, embodied
+experience of encountering something beautiful — no felt sense, only
+statistical correlation. Whether "taste" requires that felt sense to
+count as taste at all, or whether sufficiently sophisticated pattern-
+matching could someday be functionally indistinguishable from it, is
+a real open question in philosophy of mind that I don't think gets
+resolved by better engineering alone.
