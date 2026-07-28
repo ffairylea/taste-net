@@ -5,8 +5,8 @@ no scikit-learn), trained to predict whether I would save an image
 — using only my own labeled Pinterest-style data.
 
 This isn't trying to solve "aesthetics" or build a general taste
-model. It's a scoped, honest question: **can a simple model, trained
-only on my choices, predict my choices — and where does it fail?**
+model. It's a scoped, honest question: can a simple model, trained
+only on my choices, predict my choices — and where does it fail?
 
 ## Why this exists
 
@@ -25,15 +25,15 @@ descent I wrote myself (see `src/model.py`).
 
 ## What's actually happening, mathematically
 
-- **Image → vector**: each image becomes a point in ~29-dimensional
+- Image → vector: each image becomes a point in ~29-dimensional
   space (color stats + a coarse histogram). This is the same idea as
   a text embedding, just with hand-built features instead of a
   trained encoder.
-- **Learning = gradient descent**: the network makes a guess, measures
+- Learning = gradient descent: the network makes a guess, measures
   how wrong it was (cross-entropy loss), and uses calculus (the chain
   rule, applied layer by layer — backpropagation) to figure out which
   direction to nudge every weight to be less wrong next time.
-- **The real question**: is "my taste" *linearly separable* in this
+- The real question: is "my taste" *linearly separable* in this
   feature space, or does it need the hidden layer's non-linearity to
   be captured at all? The project can actually answer this — try
   removing the hidden layer and compare accuracy.
@@ -68,8 +68,8 @@ If I train a model only on things I've already chosen, and it "learns
 my taste," what has it actually learned? A few honest possibilities,
 not resolved here, worth sitting with:
 
-- It might just be learning to **replay my existing biases back to
-  me** — confirming what I already like rather than discovering
+- It might just be learning to replay my existing biases back to
+  me — confirming what I already like rather than discovering
   anything about aesthetics.
 - "Taste" might not be a stable target at all — my Pinterest saves
   from six months ago and today might already disagree with each
