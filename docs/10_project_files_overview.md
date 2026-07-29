@@ -28,6 +28,32 @@ features.py to get its feature vector, and assembles the full X
   memorized. This is what produces the train vs. test accuracy gap
   I use to check for overfitting.
 
+### Why training's mean/std gets reused on test data, not recalculated
+
+Imagine training images average 0.55 brightness, while test images
+happen to average 0.61 (just by chance, from random sampling into a
+smaller set). If each set were normalized using its OWN separate
+mean, training data gets centered around 0.55, test data gets
+centered around a different point, 0.61. The model trained on data
+centered at 0.55 — but evaluating it on data rescaled to a different
+reference point means testing it on data that doesn't relate to the
+training data the same way anymore, similar to training someone on
+speed limits in km/h then testing them in mph without saying so.
+
+Using training's mean/std on BOTH sets keeps everything on the exact
+same scale throughout — a normalized value means the same thing
+whether it came from a training or test image.
+
+There's also a deeper reason this matters: test data exists to
+simulate "brand new images the model has never seen, evaluated
+fairly." Computing statistics FROM the test set to normalize it
+uses information about the test set's own distribution during
+preprocessing, even without touching its labels directly — a subtle
+form of data leakage that could make test accuracy look artificially
+better than it would on truly unseen future images, since real new
+images wouldn't come with their own conveniently pre-computed
+statistics matching this specific batch.
+
 ## model.py
 
 The actual neural network — covered in full in files 03-09.
