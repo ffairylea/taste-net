@@ -47,6 +47,130 @@ Check: $0.786 + 0.175 + 0.039 = 1.000$ — exactly what's needed, a
 genuine probability distribution across all boards. Interpretation:
 78.6% confident pink, 17.5% winter-minimal, 3.9% board 3.
 
+## Why exponentiate — testing the alternatives
+
+The claim above is that exponentiating is needed because it's always
+positive. That's true but incomplete, because plenty of operations
+produce positive numbers. Working through why the obvious
+alternatives fail sharpens what softmax actually requires.
+
+**Alternative 1: just divide by the sum, no exponential.**
+
+With $z = [2.0, 1.0, 0.1]$, the sum is 3.1, giving
+$[0.645, 0.323, 0.032]$. That sums to 1 and looks fine.
+
+Now let one score go negative — $z = [2.0, -1.0, 0.1]$. The sum is
+1.1:
+
+$$\left[\frac{2.0}{1.1},\ \frac{-1.0}{1.1},\ \frac{0.1}{1.1}\right] = [1.82,\ -0.91,\ 0.09]$$
+
+A probability of $-0.91$, and another of $1.82$. Both meaningless.
+Raw scores have no sign restriction — they're outputs of a weighted
+sum, which can land anywhere — so any scheme that requires them to
+be positive is broken from the start.
+
+**Alternative 2: square them first.**
+
+Squaring guarantees positivity. With $z = [2.0, 1.0, 0.1]$:
+
+$$[4.0,\ 1.0,\ 0.01] \rightarrow \text{sum } 5.01 \rightarrow [0.798,\ 0.200,\ 0.002]$$
+
+Valid. Now try $z = [-2.0, 1.0, 0.1]$:
+
+$$[4.0,\ 1.0,\ 0.01] \rightarrow [0.798,\ 0.200,\ 0.002]$$
+
+Identical output. The score of $-2.0$ — the model's *most rejected*
+board — received the highest probability, because squaring erased
+the sign. Absolute value fails the same way for the same reason.
+
+So the requirement isn't "produce positive numbers." It's **strictly
+increasing**: a larger input must always produce a larger output,
+with no folding or wrapping. $e^z$ satisfies this — $e^{-2} = 0.135$,
+$e^0 = 1$, $e^2 = 7.389$, always climbing, always positive, order
+preserved perfectly.
+
+**Alternative 3: some other strictly increasing positive function,
+like $2^z$.**
+
+This would actually work. Nothing breaks. The reason $e$ wins is
+what happens next, in the loss function.
+
+Take the log of a softmax output:
+
+$$\log \hat y_i = \log\frac{e^{z_i}}{\sum_j e^{z_j}} = z_i - \log\sum_j e^{z_j}$$
+
+The $\log$ and the $e$ annihilate each other, leaving the raw score
+$z_i$ minus a term identical for every class. And cross-entropy
+*takes the log* — the loss is $-\log(\hat y_{\text{correct}})$. So
+the loss becomes:
+
+$$L = -z_{\text{correct}} + \log\sum_j e^{z_j}$$
+
+The exponential has vanished from the first term before
+differentiation even begins. With $2^z$ the same cancellation
+happens but drags a $\log 2$ along with it, permanently attached to
+every gradient term. Still correct, just carrying an unnecessary
+constant everywhere forever.
+
+**The deeper reason, connecting to file 05.**
+
+Sigmoid was derived in file 05 by starting from log-odds:
+
+$$z = \log\frac{p}{1-p}$$
+
+and solving for $p$. Solving that required exponentiating both
+sides — the $e$ in sigmoid's formula wasn't chosen, it appeared
+because the operation being undone was a logarithm.
+
+Softmax is the same situation with more classes. The raw score $z$
+behaves like a log-probability, so recovering an actual probability
+means applying the inverse of log, which is $e^x$. The exponential
+isn't a design decision anyone made for convenience. It's what
+remains when a logarithm gets inverted.
+
+And that also explains, from a different direction, why the gradient
+cancels so cleanly later in this file. Cross-entropy applies a log,
+softmax applies an exponential, and those operations undo each
+other. The cancellation isn't a lucky algebraic accident — it's two
+inverse functions meeting.
+
+## Sigmoid is softmax with two classes — shown explicitly
+
+Case A below notes that softmax's derivative matches sigmoid's, and
+attributes it to sigmoid being softmax's two-class case. Here is
+that claim actually demonstrated rather than asserted.
+
+**With numbers first.** Two classes, scores $z_1 = 2.0$ and
+$z_2 = 1.0$. Softmax on the first:
+
+$$\hat y_1 = \frac{e^{2.0}}{e^{2.0} + e^{1.0}} = \frac{7.389}{7.389 + 2.718} = \frac{7.389}{10.107} = 0.731$$
+
+Now sigmoid, applied to the *difference* between the two scores:
+
+$$\sigma(2.0 - 1.0) = \sigma(1.0) = \frac{1}{1 + e^{-1.0}} = \frac{1}{1.368} = 0.731$$
+
+The same number — not approximately, exactly.
+
+**Now the algebra showing it always holds.** Start with two-class
+softmax and divide numerator and denominator by $e^{z_1}$:
+
+$$\hat y_1 = \frac{e^{z_1}}{e^{z_1} + e^{z_2}} = \frac{1}{1 + \frac{e^{z_2}}{e^{z_1}}} = \frac{1}{1 + e^{z_2 - z_1}} = \frac{1}{1 + e^{-(z_1 - z_2)}}$$
+
+That final expression is precisely sigmoid's formula, evaluated at
+$z_1 - z_2$.
+
+**What this explains about the binary model.** With two classes,
+only the *difference* between the scores affects the output — adding
+5 to both changes nothing, since it cancels in $z_1 - z_2$. So one
+of the two scores is redundant: fix $z_2 = 0$ and let a single
+output neuron represent the difference directly.
+
+That is why `model.py` has $W_2$ of shape `(n_hidden, 1)` while
+`model_multiclass.py` has `(n_hidden, n_classes)`. The binary model
+isn't using a different mechanism with fewer outputs — it's using
+this exact mechanism, with the redundant second output eliminated
+because it carries no information.
+
 ## Numerical stability — the max-subtraction trick
 
 If $z$ values are very large (say 1000 vs 500), $e^{1000}$ would

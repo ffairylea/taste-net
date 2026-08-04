@@ -15,14 +15,14 @@ toward "no" → weight it -0.3. There's also some fixed baseline lean,
 
     (0.6 × 0.5) + (0.2 × -0.3) + 0.1 = 0.3 - 0.06 + 0.1 = 0.34
 
-That's the entire computation. 0.34 is the neuron's raw score.
+So 0.34 is the neuron's raw score.
 
 ## Naming the pieces
 
 - The inputs (0.6, 0.2) = **x**
 - The multipliers (0.5, -0.3) = **W** (weights)
 - The fixed add-on (0.1) = **b** (bias)
-- The result (0.34) = **z**
+- The result (0.34) = **z** (raw score)
 
 So z = xW + b is just "multiply each input by its weight, add them
 up, add the bias" — written with letters so the same recipe can be
@@ -31,7 +31,7 @@ rounds of training, without rewriting the arithmetic every time.
 
 Where do W and b actually come from? Not chosen by me — they start
 as small random numbers, then get automatically adjusted by training
-(gradient descent) based on what reduces error on my real labeled
+(gradient descent, explained later :) based on what reduces error on my real labeled
 images.
 
 ## Why do we even add a bias?

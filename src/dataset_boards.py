@@ -12,7 +12,7 @@ its own folder (see PHASE2_MULTIBOARD_PLAN.md):
 Board names are discovered from the folder names, so adding a new
 board = making a new folder and dropping images in. No code change.
 
-Labels here are ONE-HOT vectors instead of single 0/1 numbers:
+Labels here are one-hot vectors instead of single 0/1 numbers:
 if the boards are [pink, winter_minimal, cottage], then a
 winter_minimal image gets the label [0, 1, 0]. One-hot is what
 makes the categorical cross-entropy sum "pick out" exactly the

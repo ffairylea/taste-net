@@ -17,7 +17,7 @@ multiplies by 0 and disappears:
 - If y=1: L = -log(ŷ)
 - If y=0: L = -log(1-ŷ)
 
-## Why this specific formula, not something simpler?
+## Why this specific formula and not something simpler?
 
 A simpler-seeming option would be mean squared error: L = (ŷ-y)².
 Cross-entropy is used instead because of what log(x) does as x
@@ -56,4 +56,4 @@ Using the running example from earlier files: ŷ ≈ 0.568, y = 1:
 Not near 0 (which would mean a great, confident, correct guess), not
 huge either (which would mean a confident, wrong guess) — reflecting
 "reasonable direction, but uncertain, plenty of room to improve."
-This is the exact number the backward pass (file 07) starts from.
+This is the exact number the backward pass (file 07) starts from :).

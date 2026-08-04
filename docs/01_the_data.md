@@ -1,6 +1,6 @@
 # 01 — What is the input, actually?
 
-An image starts as a giant grid of pixel numbers — way too many
+An image starts as a giant grid of pixel numbers; way too many
 (12,000+ for a 64x64 image) to learn from directly with only ~450
 images. So `features.py` compresses each image down into just 29
 numbers instead: brightness, saturation, warmth, color histogram
@@ -12,8 +12,8 @@ not a black box. For example, saturation for one pixel is:
     (max(R,G,B) - min(R,G,B)) / max(R,G,B)
 
 averaged across every pixel in the image. Brightness, warmth, and the
-rest are similarly plain arithmetic — see features.py for the exact
-formulas.
+rest are similarly plain arithmetic (see features.py for the exact
+formulas).
 
 ## The feature vector
 
@@ -23,7 +23,7 @@ as one point in a 29-dimensional space — the same idea as a point
 An image isn't "a picture" to the model anymore at this stage — it's
 just a location in this 29-dimensional space.
 
-## Why this matters — the actual bet the whole project makes
+## Why this matters
 
 The entire project rests on one geometric bet: if my real "yes"
 (pink board) images cluster together in one region of this 29D

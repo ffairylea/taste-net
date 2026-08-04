@@ -2,7 +2,7 @@
 
 Everything in files 01-08 is the pure math. This file covers a few
 things in model.py that are necessary for real, working code but
-aren't new mathematical concepts — just practical engineering on
+aren't new mathematical concepts, but rather just practical engineering on
 top of the math, explained in the order they appear in the file.
 
 ## import numpy as np

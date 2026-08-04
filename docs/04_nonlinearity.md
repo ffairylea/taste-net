@@ -4,12 +4,12 @@ So far, every neuron just computes a weighted sum — multiply inputs
 by weights, add a bias. Here's why stacking multiple layers of just
 that, with nothing else, doesn't actually gain anything.
 
-## What is ReLU, quickly, before the proof below
+## What is ReLU, before the proof below
 
-ReLU stands for "Rectified Linear Unit" — despite the fancy name,
+ReLU stands for "Rectified Linear Unit";
 it's a simple function: ReLU(z) = max(0, z). If z is
 positive, output z unchanged. If z is negative, output 0 instead.
-That's the entire definition. It's applied to every hidden neuron's
+It's applied to every hidden neuron's
 z value, right after the weighted sum, before passing the result to
 the next layer.
 
@@ -98,7 +98,7 @@ neuron detect." Either the pattern is present (pass the signal on)
 or it isn't (pass along silence). ReLU encodes exactly that: no such
 thing as negative contribution for one specific narrow pattern.
 
-The neuroplasticity connection: this is structurally similar to how
+The neuroplasticity connection :) : this is structurally similar to how
 real neurons work — fire (send a signal, roughly proportional to how
 strongly driven) past a threshold, or stay silent below it. No such
 thing as a real neuron firing "backward." ReLU is a simplified

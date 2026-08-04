@@ -59,7 +59,7 @@ def main():
     for i in order[:8]:
         print(f"  {FEATURE_NAMES[i]:16s} {importance[i]:.4f}")
 
-    net.save("../taste_net_weights.npz")
+    net.save("../taste_net_weights.npz", mean=mean, std=std)
     print("\nSaved weights to ../taste_net_weights.npz")
 
 

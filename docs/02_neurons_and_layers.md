@@ -3,12 +3,11 @@
 Before getting into the actual math, it's worth being precise about
 two words that get used constantly from here on: neuron and layer.
 
-## Neuron
+## Neuron (analogy from neuroscience :)
 
 A neuron is the smallest building block in the network. It takes in
 some numbers, computes one weighted sum, applies one activation
-function, and produces one output number. That's the entire job of
-a single neuron — nothing more.
+function, and produces one output number. 
 
 ## Layer
 
@@ -19,7 +18,7 @@ multiple outputs at once, one per neuron, all computed in parallel.
 
 ## In taste-net, specifically
 
-- **Hidden layer** = 8 neurons (picked 8 as a reasonable middle-ground guess for ~450 images — not derived from a formula, worth testing other values later), side by side. Each one receives the
+- **Hidden layer** = 8 neurons (picked 8 as a reasonable middle-ground guess for ~450 images — worth testing other values later), side by side. Each one receives the
   same 29 features, but each has its own private set of 29 weights
   plus its own bias, so each computes its own separate raw score.
 - **Output layer** = 1 neuron. It receives the 8 hidden layer
@@ -30,7 +29,7 @@ The picture:
 
     29 features (x)
          |
-         | (every one of these 29 numbers goes to EVERY neuron below)
+         | (every one of these 29 numbers goes to every neuron below)
          v
     [neuron1][neuron2][neuron3]...[neuron8]   <- hidden layer
          |       |        |            |

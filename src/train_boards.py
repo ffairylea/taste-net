@@ -18,8 +18,8 @@ falls back to a SYNTHETIC sanity check instead of dying:
      learn. If it can't hit high accuracy on easy synthetic
      clusters, something is wrong in the code, not the data.
 
-That means the code can be verified as correct before any board
-images exist to make sure it isn't about the data set.
+That means the code can be verified as correct BEFORE any board
+images exist.
 """
 
 import os
@@ -39,7 +39,7 @@ def numerical_gradient_check(seed=0):
     brute-force numerical slopes: nudge one weight by +h and -h,
     re-run the loss both times, and the slope is
         (loss(w+h) - loss(w-h)) / (2h).
-    Just the definition of a derivative. If this
+    No calculus, just the definition of a derivative. If this
     matches what the chain-rule code produces, the math AND the
     code are right."""
     rng = np.random.default_rng(seed)
@@ -206,14 +206,18 @@ def main():
     test_acc = (net.predict(X_test_norm) == l_test).mean()
     print(f"\nFinal train accuracy: {train_acc:.2%}")
     print(f"Final test accuracy:  {test_acc:.2%}")
-    print(f"(random guessing baseline with {n_classes} boards: "
-          f"{1/n_classes:.2%} — always compare against this, not 50%)")
+    # The honest baseline isn't random guessing — it's guessing the
+    # LARGEST board every time, which scores higher than 1/n whenever
+    # the boards are uneven. Beat that, not the easier number.
+    largest = np.bincount(l_test, minlength=n_classes).max() / len(l_test)
+    print(f"(baselines to beat — random guessing: {1/n_classes:.1%}, "
+          f"always guessing the largest board: {largest:.1%})")
 
     print("\nConfusion matrix (rows = true board, cols = predicted):")
     M = confusion_matrix(l_test, net.predict(X_test_norm), n_classes)
     print_confusion(M, boards)
 
-    net.save("../board_net_weights.npz")
+    net.save("../board_net_weights.npz", mean=mean, std=std)
     # Save the board order too — the weights are meaningless without
     # knowing which output index means which board.
     with open("../board_net_classes.txt", "w") as f:

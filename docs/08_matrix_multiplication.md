@@ -5,7 +5,7 @@ hand, one number at a time. Real training needs this exact same
 computation repeated for 8 neurons and ~360 images (one training
 batch) at once. Matrix multiplication is just this same
 multiply-and-add recipe, done for every combination simultaneously,
-instead of writing a loop that repeats it one at a time.
+instead of writing a long loop that repeats it one at a time.
 
 ## What actually happens
 
@@ -65,15 +65,7 @@ Same "multiply pairs, sum them" recipe as the single-neuron hand
 example in file 03 — just done for 2 images and 2 neurons in one
 shot, instead of one calculation at a time.
 
-## Why this matters practically
-
-Without matrix multiplication, `model.py` would need nested loops —
-one loop over every image, another loop inside that over every
-neuron — recomputing the exact same z = xW+b arithmetic each time.
-Matrix multiplication (the @ operator, via numpy) does all of that
-in one line, and it's also dramatically faster computationally,
-since numpy runs these operations in optimized, low-level code
-rather than plain Python loops.
+# Practically:
 
 Every step in files 03-07 — z1, a1, z2, ŷ, the backward pass
 gradients — is written in `model.py` using this same matrix form,

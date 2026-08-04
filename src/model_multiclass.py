@@ -136,10 +136,21 @@ class BoardNet:
         top of the soft distribution."""
         return self.predict_proba(X).argmax(axis=1)
 
-    def save(self, path):
-        np.savez(path, W1=self.W1, b1=self.b1, W2=self.W2, b2=self.b2)
+    def save(self, path, mean=None, std=None):
+        """Same as TasteNet.save — weights are useless on new data
+        without the training normalization stats. See model.py."""
+        arrays = dict(W1=self.W1, b1=self.b1, W2=self.W2, b2=self.b2)
+        if mean is not None:
+            arrays["mean"] = mean
+        if std is not None:
+            arrays["std"] = std
+        np.savez(path, **arrays)
 
     def load(self, path):
+        """Returns (mean, std) if they were saved, else (None, None)."""
         d = np.load(path)
         self.W1, self.b1, self.W2, self.b2 = d["W1"], d["b1"], d["W2"], d["b2"]
         self.n_classes = self.W2.shape[1]
+        mean = d["mean"] if "mean" in d else None
+        std = d["std"] if "std" in d else None
+        return mean, std

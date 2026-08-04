@@ -16,12 +16,13 @@ conversion.
 It takes any real number and squashes it into a value strictly
 between 0 and 1. We use it only at the very last layer, after
 combining all the hidden neurons together into one final z2, because
-that's the one place we need an actual "how confident" number, not
-just an internal detector value.
+that's the one place we need an actual "how confident" number.
 
 ## Where this formula actually comes from (log-odds)
 
-Start with what's needed: a way to represent a probability p (between
+Sigmoid wasn't picked arbitrarily.
+
+Let's start with what's needed: a way to represent a probability p (between
 0 and 1) using a raw score that can be any real number — since
 z = xW+b can come out as anything, positive or negative, huge or tiny.
 
@@ -82,8 +83,23 @@ So:
 
 This is maximized (0.25) when σ(z)=0.5 (z=0) — sigmoid's steepest
 point — and shrinks toward 0 as σ(z) approaches 0 or 1 (confident
-predictions). This formula is the literal mathematical reason
-sigmoid "goes flat" at extremes, not just a visual description.
+predictions). This formula is the mathematical reason
+sigmoid "goes flat" at extremes.
+
+Where the max sits — genuinely good. σ'(z) = σ(z)(1−σ(z)) peaks when σ(z) = 0.5, meaning z = 0, meaning the model is maximally uncertain. So the learning signal is strongest exactly where the model has no idea, and weakest where it's already committed. 
+
+How big the max is — bad. 0.25 is less than 1. Every time a gradient passes back through a sigmoid, it gets multiplied by at most 0.25, usually much less. Stack sigmoid layers and:
+
+0.25²  = 0.0625
+0.25⁵  = 0.00098
+0.25¹⁰ = 0.00000095
+Ten layers and the signal reaching the first layer is about a millionth of what left the last one — and that's the best case, assuming every neuron sits at its optimum. Realistically it's far worse. The early layers effectively stop learning. That's the vanishing gradient problem, and 0.25 is precisely the mechanism.
+
+Compare ReLU: derivative is exactly 1 wherever z > 0. Ten layers gives 1¹⁰ = 1. No shrinkage at all. That's the whole reason model.py uses ReLU in the hidden layer — because it doesn't shrink the signal on the way back.
+
+So why is sigmoid in my network at all? Only at the output, where two things save it. It's a single layer, so there's nothing to compound. And the cancellation means σ'(z) doesn't appear in the output gradient anyway — it's ŷ − y, with the derivative already gone.
+
+Sigmoid's flatness is a real defect, but my code just puts it in the one position where it can't do damage.
 
 ## Why we'll need this derivative later — the actual reason
 
@@ -182,7 +198,7 @@ weaken the correction signal exactly when it's needed most.
 
 ### How does a derivative's size actually relate to "how much to correct"?
 
-This is worth making explicit, since it's easy to nod past. The gradient (the derivative we compute) isn't just a direction (positive
+The gradient (the derivative we compute) isn't just a direction (positive
 or negative) — its SIZE directly controls how big the correction is.
 Recall the update rule: W ← W - lr × gradient. A gradient of -0.4
 produces a bigger weight change than a gradient of -0.004, given the

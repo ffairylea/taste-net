@@ -19,7 +19,8 @@ exactly how to correct itself.
 Full derivation of this in file 05 (sigmoid's derivative) and here,
 worked through both the long way and the shortcut way:
 
-Piece 1 — cross-entropy's derivative w.r.t. ŷ:
+Piece 1 — cross-entropy's (the loss function I'm using) derivative 
+w.r.t. ŷ:
 
     ∂L/∂ŷ = -[y/ŷ - (1-y)/(1-ŷ)]
 

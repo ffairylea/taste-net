@@ -119,9 +119,27 @@ class TasteNet:
         y_pred, _ = self.forward(X)
         return y_pred
 
-    def save(self, path):
-        np.savez(path, W1=self.W1, b1=self.b1, W2=self.W2, b2=self.b2)
+    def save(self, path, mean=None, std=None):
+        """Saves weights AND the normalization stats used in training.
+
+        The mean/std matter as much as the weights. The network was
+        trained on z-scored features, so a new image has to be scaled
+        by the SAME mean and std to land in the same coordinate
+        system. Saving weights alone makes them unusable on new data —
+        and the tempting shortcut (normalizing one image against its
+        own mean/std) produces a vector of zeros every time, which
+        fails silently rather than loudly."""
+        arrays = dict(W1=self.W1, b1=self.b1, W2=self.W2, b2=self.b2)
+        if mean is not None:
+            arrays["mean"] = mean
+        if std is not None:
+            arrays["std"] = std
+        np.savez(path, **arrays)
 
     def load(self, path):
+        """Returns (mean, std) if they were saved, else (None, None)."""
         d = np.load(path)
         self.W1, self.b1, self.W2, self.b2 = d["W1"], d["b1"], d["W2"], d["b2"]
+        mean = d["mean"] if "mean" in d else None
+        std = d["std"] if "std" in d else None
+        return mean, std
