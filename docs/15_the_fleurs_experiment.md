@@ -264,8 +264,140 @@ patch instead of a whole feature vector, and reused across
 positions. It is not a different kind of mathematics; it is the same
 arithmetic organised so that position survives.
 
+
 ## Result
 
-Not yet run. To be filled in after `train_boards.py` executes on
-this data, with the confusion matrix and an honest assessment of
-which parts of the above prediction survived.
+Run on 2026-08-04, 500 epochs, plain gradient descent at $lr = 0.1$
+(the same configuration as Phase 1 — deliberately, so the two are
+comparable). 150 test images from a stratified 20% split.
+
+**Final test accuracy: 67.33%** (train 76.21%)
+
+Baselines: random 33.3%, always-guess-fleurs 38.0%.
+
+### Confusion matrix
+
+Rows are the true board, columns the prediction.
+
+| | fleurs | pink | winter_minimal |
+|---|---|---|---|
+| **fleurs** | **35** | 18 | 4 |
+| **pink** | 16 | **35** | 4 |
+| **winter_minimal** | 5 | 2 | **31** |
+
+Per class:
+
+| board | recall | precision | test n |
+|---|---|---|---|
+| fleurs | 61.4% | 62.5% | 57 |
+| pink | 63.6% | 63.6% | 55 |
+| winter_minimal | 81.6% | 79.5% | 38 |
+
+### Scoring the prediction
+
+Four of the five specific claims held.
+
+1. **winter_minimal classified reliably** — correct. 81.6% recall,
+   far above both baselines.
+2. **Largest off-diagonal cell is fleurs → pink** — correct. 18, the
+   biggest single error cell.
+3. **fleurs recall substantially worse than winter_minimal** —
+   correct. 61.4% against 81.6%. Though "near chance" was too
+   pessimistic; fleurs is clearly better than the 33% floor.
+4. **Overall accuracy between the baselines and Phase 1's ~89%** —
+   correct. 67.3% sits between 38.0% and 89.25%.
+5. **The direction of the confusion** — **wrong**, and this is the
+   most informative part of the result.
+
+### Where the prediction was wrong
+
+The claim was *absorption*: pink flowers being swallowed by the pink
+board. That describes an asymmetric error — many fleurs misread as
+pink, few pink misread as fleurs.
+
+The measurement shows 18 fleurs → pink and 16 pink → fleurs. Very
+nearly symmetric.
+
+Absorption would mean the model has some
+purchase on the distinction and is biased toward one side of it.
+Symmetric confusion means it has no purchase at all: the two boards
+occupy overlapping regions of the feature space, and the model is
+close to guessing between them.
+
+Restricting attention to the 112 fleurs and pink test images, the
+model gets 62.5% of them right — against 50% for a coin flip between
+those two classes. It is barely above chance on the distinction it
+was supposed to find hard, and the failure is mutual rather than
+directional.
+
+The corrected claim is therefore stronger than the original one. Not
+"flowers look pink so they get called pink," but "flowers and the
+pink board are not separable by colour statistics in either
+direction."
+
+### The number that isolates the variable
+
+Collapsing `fleurs` and `pink` into a single class — asking only
+whether an image is pink-ish or winter_minimal, and ignoring the
+distinction the features cannot express — gives:
+
+**90.0% accuracy.**
+
+Phase 1, the binary yes/no task, achieved 89.25%.
+
+The model performs essentially identically on the distinction color
+can represent, and collapses on the one it cannot. That rules out
+the alternative explanations:
+
+- **Not model capacity.** The same network, same width, same
+  training, reaches 90% when asked a colour-expressible question.
+- **Not optimisation.** The loss was still falling at epoch 500;
+  training longer or switching to Adam would improve fit, not supply
+  missing information.
+- **Not data volume.** 190 winter_minimal images support 81.6%
+  recall, while 286 fleurs images support 61.4%. The board with
+  *fewer* examples is classified *better*.
+- **Not class imbalance.** If imbalance were driving the result, the
+  errors would skew toward the larger class. They are symmetric.
+
+What remains is representation. `fleurs` and `pink` differ in
+subject matter, and subject matter is a spatial property. The 32
+features average and bin over the whole image, discarding position
+before the network sees anything. The information required to
+separate these two boards is not present in the input.
+
+A further detail supports this. Only 7.1% of fleurs and pink images
+were misrouted to winter_minimal, while 18.4% of winter_minimal
+images were misrouted to one of the other two. The boundary the
+features *can* express is respected in both directions; the failure
+is localised precisely where the prediction said it would be.
+
+### What this establishes
+
+This is the empirical case for learned features, measured rather
+than asserted. A convolutional network of the kind described above
+would attack this exact gap: it retains position, composes edges
+into curves and curves into parts, and can therefore represent
+"radially arranged petal shapes" — a thing that has no expression in
+a colour histogram.
+
+The remaining README items are now motivated by a specific number
+rather than by general curiosity. A comparison against a pretrained
+vision model would answer how much of the 62.5% → ceiling gap closes
+when features are learned instead of hand-designed. The blue-channel
+ablation asks a related question from the other side: how much of
+the working 90% depends on a narrow colour shortcut.
+
+### Honest caveats
+
+- 150 test images means one image is worth 0.67 percentage points.
+  The 61.4% versus 63.6% gap between fleurs and pink recall is
+  roughly one image and should not be interpreted.
+- The 90.0% collapsed figure is not a model that was trained on the
+  collapsed task. It is the three-way model's predictions,
+  re-scored while ignoring one distinction. A model trained directly
+  on two classes might do better or worse.
+- Board membership is a label supplied by one person's filing
+  decisions. Some flower images might reasonably belong to the pink
+  board, which puts an unknown ceiling below 100% that has nothing
+  to do with the model.
