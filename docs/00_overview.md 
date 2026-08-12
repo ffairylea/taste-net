@@ -9,9 +9,9 @@ like sentence-transformers, which I used in an earlier project
 (chaos-organizer) without knowing the math underneath. Every file
 here documents that understanding and explains the processes behind 
 the code, worked through with an AI tutor across a lot of sessions,
-by planning, by building and meanwhile asking questions making sure I 
+by planning, building and asking questions making sure I 
 understand everything.
 
 # How to read the documentation?
 
-Read the files in 'docs' in order.
+Read the files in 'docs' in order, from 01 to 15.

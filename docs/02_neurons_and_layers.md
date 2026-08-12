@@ -1,8 +1,5 @@
 # 02 — Neurons and layers: the basic vocabulary
 
-Before getting into the actual math, it's worth being precise about
-two words that get used constantly from here on: neuron and layer.
-
 ## Neuron (analogy from neuroscience :)
 
 A neuron is the smallest building block in the network. It takes in

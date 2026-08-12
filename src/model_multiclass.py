@@ -111,17 +111,24 @@ class BoardNet:
 
         return dW1, db1, dW2, db2
 
-    def train_step(self, X, Y, lr=0.05):
-        """Forward -> loss -> backward -> gradient descent update.
-        Identical rhythm to TasteNet.train_step."""
+    def train_step(self, X, Y, lr=0.05, optimizer=None):
+        """Forward -> loss -> backward -> update.
+        Identical rhythm to TasteNet.train_step, including optional
+        optimizer support (see optimizers.py)."""
         Y_pred, cache = self.forward(X)
         loss = self.compute_loss(Y, Y_pred)
         dW1, db1, dW2, db2 = self.backward(Y, cache)
 
-        self.W1 -= lr * dW1
-        self.b1 -= lr * db1
-        self.W2 -= lr * dW2
-        self.b2 -= lr * db2
+        if optimizer is None:
+            self.W1 -= lr * dW1
+            self.b1 -= lr * db1
+            self.W2 -= lr * dW2
+            self.b2 -= lr * db2
+        else:
+            optimizer.step(
+                [self.W1, self.b1, self.W2, self.b2],
+                [dW1, db1, dW2, db2],
+            )
 
         return loss
 

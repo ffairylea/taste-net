@@ -101,17 +101,30 @@ class TasteNet:
 
         return dW1, db1, dW2, db2
 
-    def train_step(self, X, y, lr=0.05):
+    def train_step(self, X, y, lr=0.05, optimizer=None):
         """One full pass: forward, compute loss, backward, update
-        weights by gradient descent (weight -= lr * gradient)."""
+        weights.
+
+        With optimizer=None this is unchanged: plain gradient
+        descent, weight -= lr * gradient. Passing an optimizer from
+        optimizers.py swaps in a different update rule while leaving
+        the forward and backward passes completely untouched — the
+        gradients are the same, only what's done with them changes.
+        """
         y_pred, cache = self.forward(X)
         loss = self.compute_loss(y, y_pred)
         dW1, db1, dW2, db2 = self.backward(y, cache)
 
-        self.W1 -= lr * dW1
-        self.b1 -= lr * db1
-        self.W2 -= lr * dW2
-        self.b2 -= lr * db2.flatten()
+        if optimizer is None:
+            self.W1 -= lr * dW1
+            self.b1 -= lr * db1
+            self.W2 -= lr * dW2
+            self.b2 -= lr * db2.flatten()
+        else:
+            optimizer.step(
+                [self.W1, self.b1, self.W2, self.b2],
+                [dW1, db1, dW2, db2.flatten()],
+            )
 
         return loss
 

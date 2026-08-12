@@ -1,171 +1,182 @@
 # taste-net
 
-A small neural network, built entirely from raw numpy (no PyTorch,
-no scikit-learn), trained to predict whether I would save an image
-— using only my own labeled Pinterest-style data.
+A neural network built from raw numpy, trained on my own Pinterest
+boards, used to run one experiment: **can 32 hand-computed color
+statistics tell a flower from a pink bedroom?**
 
-This isn't trying to solve "aesthetics" or build a general taste
-model. It's a scoped, honest question: can a simple model, trained
-only on my choices, predict my choices — and where does it fail?
+I predicted they couldn't, wrote the prediction into the repository
+before training, and ran it. Then I found that two thirds of my
+dataset were duplicates, rebuilt it from scratch, and ran everything
+again.
 
-The most useful result in the project is a failure, and it was
-predicted in writing before it was measured.
+The three most useful things in this project are a failure I
+designed on purpose, a benchmark I caught myself rigging, and a data
+bug that had been silently inflating every number I'd reported.
 
-## Why this exists
+## The experiment
 
-I built [chaos-organizer](https://github.com/ffairylea/chaos-organizer)
-using `sentence-transformers` for text embeddings — a real library
-doing real work I didn't fully understand under the hood. This
-project is the opposite move: build the smallest honest version of
-"a model that learns preference" myself, from the math up, so I
-actually understand what a library like that is doing when I use one.
+Three boards: `pink`, `winter_minimal`, and `fleurs`. The third was
+chosen to be hard on purpose — most of the flower images *are*
+pink, but they belong to a different board, so separating them
+requires something other than color.
 
-No pretrained embeddings, no CLIP, no transfer learning. Every
-feature the model sees is a number I computed by hand (see
-`src/features.py`) — brightness, saturation, contrast, color
-histograms. Every step of learning is backpropagation and gradient
-descent I wrote myself (see `src/model.py`).
-
-## What's actually happening, mathematically
-
-- **Image → vector**: each image becomes a point in 32-dimensional
-  space (5 color statistics + 3 average channel values + a 24-bin
-  histogram). Same idea as a text embedding, with hand-built
-  features instead of a trained encoder.
-- **Learning = gradient descent**: the network guesses, measures how
-  wrong it was (cross-entropy loss), and uses the chain rule applied
-  layer by layer — backpropagation — to work out which direction to
-  nudge every weight.
-- **Sigmoid and softmax are the same function.** Softmax with two
-  classes reduces algebraically to sigmoid applied to the difference
-  of the two scores, which is why the binary model needs only one
-  output neuron. Derived in `docs/11`.
-- **The gradient simplification isn't a coincidence.** Sigmoid +
-  binary cross-entropy cancels to $\hat y - y$; softmax + categorical
-  cross-entropy cancels to the same thing with vectors. One identity
-  appearing twice, because cross-entropy takes a log and both
-  activations exponentiate.
-
-## Results
-
-### Phase 1 — binary: would I save this at all?
-
-**89.25% test accuracy** (SGD, $lr = 0.1$), later **95.7%** with
-Adam.
-
-The class split is 279 yes / 187 no, so always guessing "yes" scores
-60%. That's the baseline the number should be read against.
-
-Feature importance showed the model leaning heavily on blue-channel
-histogram bins — plausibly because pink-aesthetic images occupy a
-narrow blue range, which makes blue an efficient discriminator.
-
-### Phase 2 — multiclass: which board does it belong to?
-
-Three Pinterest boards, deduplicated within and across folders
-(fleurs 286, pink 275, winter_minimal 190):
-
-**67.33% test accuracy** against a 38.0% majority-class baseline.
-
-Rows are the true board, columns the prediction:
+The prediction went into `docs/15` and was committed to git before
+any training run. The result, on 137 test images:
 
 | | fleurs | pink | winter_minimal |
 |---|---|---|---|
-| **fleurs** | **35** | 18 | 4 |
-| **pink** | 16 | **35** | 4 |
-| **winter_minimal** | 5 | 2 | **31** |
+| **fleurs** | **25** | 14 | 6 |
+| **pink** | 9 | **29** | 8 |
+| **winter_minimal** | **0** | 9 | **37** |
 
-| board | recall | precision |
-|---|---|---|
-| fleurs | 61.4% | 62.5% |
-| pink | 63.6% | 63.6% |
-| winter_minimal | 81.6% | 79.5% |
+**66.4% three-way accuracy** against a 33.3% chance baseline.
+`winter_minimal` was never once classified as `fleurs` — zero times
+out of 46 — while fleurs and pink were confused 23 times, the
+dominant error mode.
 
-### The experiment this was actually built to run
+Splitting the same run in two directions:
 
-`fleurs` was chosen deliberately to be hard. Most of the flower
-images are pink, but they belong to a different board — so the model
-has to separate them from the `pink` board on some basis other than
-"is it pink." The question is whether 32 color statistics contain
-enough information to distinguish categories that differ in *subject
-matter* while sharing a *palette*.
+| question | result |
+|---|---|
+| pink-ish vs winter_minimal | **82.5% balanced accuracy** |
+| fleurs vs pink | **59.3%**, z = 1.78, not significant |
 
-The prediction was committed to `docs/15` before training ran. Four
-of five claims held: winter_minimal separates cleanly, the largest
-error cell is fleurs → pink, fleurs recall is far below
-winter_minimal's, and overall accuracy lands between the baselines
-and Phase 1.
+Same features, same network, same training run. Capable on one
+question, at chance on the other.
 
-The fifth was wrong, and usefully so. I predicted *absorption* —
-pink flowers being swallowed by the pink board, an asymmetric error.
-The measurement shows 18 fleurs → pink and 16 pink → fleurs. Nearly
-symmetric, which means the model has no purchase on the distinction
-rather than a biased one. Restricted to those two boards it scores
-62.5%, barely above a coin flip.
+Four of five pre-registered claims held. The fifth — that the
+fleurs/pink confusion would be strongly *asymmetric*, flowers
+absorbed into the pink board — is not supported: 14 errors one way,
+9 the other, which is inside chance.
 
-**The comparison that isolates the cause:** collapsing fleurs and
-pink into one class — asking only "pink-ish or winter_minimal" and
-ignoring the distinction color cannot express — gives 90.0% raw, or
-**87.2% balanced accuracy** (the mean of per-class recalls, which is
-the figure to read since the collapsed classes are 112 vs 38 and the
-majority baseline is 74.7%).
+### Why it isn't the model
 
-So the model separates pink-ish from winter_minimal strongly while
-scoring 62.5% on fleurs versus pink — significantly above the 50%
-coin flip, but weakly so.
+- **Capacity:** a width sweep from 4 to 128 hidden units is flat.
+  At 128 the model hits 100% train accuracy while test barely moves.
+- **Unlimited capacity:** kNN fits no parameters and memorizes
+  everything. It hits the same ceiling on fleurs vs pink.
+- **Imbalance:** boards are 228 / 233 / 233.
+- **Optimization:** train 65.7%, test 66.4% — a 0.7 point gap.
+- **The features alone:** best d′ separating pink-ish from winter is
+  1.32; best separating fleurs from pink is 0.61. Measured on the
+  data with no model involved.
 
-The likely explanation is representation: subject matter is spatial,
-and every one of the 32 features averages or bins over the whole
-image, discarding position before the network sees anything. Class
-imbalance is ruled out (the two confused boards are 57 vs 55 in
-test). Capacity and optimization are **not yet ruled out** — the run
-uses one width and one untuned learning rate, and `docs/14` shows
-that same learning rate is undertuned by 5.4 points on the binary
-task.
+What remains is representation. Subject matter is spatial, and every
+one of the 32 features averages or bins over the whole image,
+discarding position before the network sees anything.
 
-`src/probe_representation.py` addresses the deeper objection that
-all of this measures one network's behavior while the conclusion is
-about the feature space: it runs kNN (nonparametric, unlimited
-capacity) on fleurs vs pink, sweeps hidden width, and computes
-per-feature separation with no model involved. Full analysis and the
-honest status of each claim in `docs/15`.
+## The data bug
 
-## Verifying the math before trusting it
+The first version of this experiment ran on images scraped with a
+browser extension. A kNN probe returned 97.7% at k=1 but 78.8% at
+k=5 — backwards, since 1-NN is the noisiest classifier there is and
+should lose to k=5.
 
-Two places where a result was checked rather than assumed.
+That ordering has one common cause: every test image has a
+near-identical twin in training, so 1-NN retrieves rather than
+generalizes.
 
-**The backward pass.** `src/train_boards.py` runs a numerical
-gradient check when no board data is present: nudge a weight by
-$\pm h$, re-run the loss, and compute $(L(w+h) - L(w-h))/2h$ — the
-definition of a derivative, no calculus involved. Worst disagreement
-against the analytic gradients: ~7e-12, which is float64 noise
-rather than error. Several weights return exactly zero from both
-methods, which is the ReLU gate being closed and the numerical check
-independently confirming what `relu_derivative` asserts. Output in
-`docs/evidence/`.
+The existing deduplication scripts compared MD5 hashes of file
+bytes, which catches byte-identical files and nothing else. The same
+pin at two resolutions passes as two distinct images. Perceptual
+hashing — greyscale, downsample to 8×8, threshold at the mean, 64
+bits, compare by Hamming distance — found the truth:
 
-**The optimizer benchmark.** My first comparison reported Adam
-reaching a loss target in 38 epochs against SGD's 220 — an apparent
-6× speedup. It was invalid: the learning rates were arbitrary, and
-SGD at $lr = 2.0$ reaches the same target in 10 epochs, faster than
-Adam. Sweeping learning rates instead gives the honest result — best
-accuracy is similar across optimizers (94.6% vs 95.7%, a difference
-of one test image), but SGD's accuracy swings 16.1 points across
-learning rates while Adam's swings 7.5. Adam's real advantage here is
-robustness to tuning, not speed. Details in `docs/14`.
+    boards      751 images  ->  67.9% near-duplicate
+    yes / no    466 images  ->  43.1% near-duplicate
 
-A bug worth recording: `train.py` originally saved trained weights
-but discarded the normalization statistics. Since the weights were
-learned in a scaled coordinate system, this made them unusable on
-new images — and the intuitive fix (normalizing a single image
-against its own mean and std) produces a vector of all zeros, so
-every image maps to the identical input and the model returns one
-constant probability. Nothing crashes. Written up in `docs/12`.
+Pinterest virtualizes its feed, so scroll-and-scrape captures the
+same pins repeatedly at whatever resolution is currently rendered.
+The extension worked correctly; the method was wrong.
+
+**What the contamination did:** it did not merely inflate numbers,
+it produced a confident result pointing the wrong way. On dirty
+data, three-way accuracy climbed from 70.8% to 95.2% across the
+width sweep, apparently proving that capacity was the limit and the
+representation claim was wrong. On clean data the sweep is flat.
+Extra width had been buying memorization of twins, not learning.
+
+The fix was a different source. Pinterest's official data export
+lists each saved pin once; `src/parse_pinterest_export.py`
+reconstructs image URLs from the hash field and names files by that
+hash, so re-downloading overwrites rather than accumulates.
+Duplicates become impossible rather than detectable. Near-duplicate
+rate after the rebuild: **6.8%**. Full account in `docs/16`.
+
+## Phase 1
+
+**72.9% test accuracy** against an exact 50% baseline (176 / 176).
+Train accuracy 72.3%, so no overfitting gap.
+
+This number went *down* from a previously reported 89.25%, and the
+drop is an improvement. The original positive class came entirely
+from the pink board, which meant the model was plausibly learning
+"is this pink" rather than "would this be saved." The rebuilt set
+samples across all 56 boards, making it the question it was supposed
+to be.
+
+## The optimizer benchmark I got wrong
+
+My first comparison reported Adam reaching a loss target in 38
+epochs against SGD's 220 — an apparent 6× speedup. It was invalid:
+the learning rates were arbitrary, and SGD at $lr = 2.0$ reaches the
+same target in 10 epochs, faster than Adam. Comparing two methods at
+one arbitrary hyperparameter each measures the hyperparameters.
+
+Sweeping properly gives the honest result: best accuracy is similar
+across optimizers, but SGD's accuracy swings 16.1 points across
+learning rates while Adam's swings 7.5. Adam's advantage here is
+robustness to tuning, not speed — a smaller claim than the first
+version implied. Details in `docs/14`.
+
+What made it worth checking was that the result was too flattering.
+A sixfold speedup from swapping an update rule on a two-layer
+network is not a plausible magnitude. The suspicion came from the
+size of the claim, not from spotting the error.
+
+## Verifying the math
+
+`src/train_boards.py` runs a numerical gradient check when no board
+data is present: nudge a weight by ±h, re-run the loss, compute
+$(L(w+h) - L(w-h))/2h$ — the definition of a derivative, no calculus
+involved. Worst disagreement against the analytic gradients: ~7e-12,
+which is float64 noise. Several weights return exactly zero from
+both methods, which is a closed ReLU gate confirmed independently.
+
+A separate bug worth recording: `train.py` originally saved trained
+weights but discarded the normalization statistics. Since the
+weights were learned in a scaled coordinate system, this made them
+unusable on new images — and the intuitive fix (normalizing a single
+image against its own mean and std) produces all zeros, so every
+image maps to the same input and the model returns one constant
+probability. Nothing crashes. Written up in `docs/12`.
+
+## What's under the hood
+
+No pretrained embeddings, no CLIP, no transfer learning. Every
+feature is a number computed by hand in `src/features.py` —
+brightness, saturation, contrast, warmth, color variance, three
+average channels, and a 24-bin color histogram. Every step of
+learning is backpropagation and gradient descent written from
+scratch in `src/model.py`.
+
+The math worth knowing:
+
+- **Sigmoid and softmax are the same function.** Two-class softmax
+  reduces algebraically to sigmoid applied to the difference of the
+  two scores, which is why the binary model needs one output neuron
+  rather than two.
+- **The gradient simplification isn't luck.** Sigmoid + binary
+  cross-entropy cancels to $\hat y - y$; softmax + categorical
+  cross-entropy cancels to the same thing with vectors. One identity
+  appearing twice, because cross-entropy takes a log and both
+  activations exponentiate.
+- **Adam's bias correction is exact, not a fudge.** The EMA returns
+  $(1 - \beta^t)g$ rather than $g$; unrolling the recursion gives a
+  geometric series whose sum makes the correction factor fall out
+  algebraically. Derived step by step in `docs/13`.
 
 ## Architecture
-
-Two stages, because "would I save this" and "which board" are
-different questions:
 
 ```
 Stage 1 (TasteNet, sigmoid)     "would I save this at all?"
@@ -175,58 +186,54 @@ Stage 1 (TasteNet, sigmoid)     "would I save this at all?"
 Stage 2 (BoardNet, softmax)     "which board?"
 ```
 
-The gate is architecturally necessary, not a convenience. Softmax
-always produces a distribution summing to 1, so a board model handed
-a photo of a parking garage will confidently assign it a board — it
+The gate is necessary rather than convenient. Softmax always
+produces a distribution summing to 1, so a board model handed a
+photo of a parking garage will confidently assign it a board — it
 has no way to say "none of these." Stage 1 supplies that answer.
 `src/predict.py` runs the chain on a single new image.
 
 ## Status
 
-- [x] Feature extraction pipeline (32 hand-computed features)
-- [x] From-scratch neural net — forward and backward pass by hand
-- [x] Phase 1: 89.25% test accuracy (60% majority baseline)
-- [x] SGD, Momentum, and Adam implemented from scratch
-      (`src/optimizers.py`), with bias correction derived from the
-      geometric series
+- [x] 32 hand-computed features, forward and backward pass by hand
+- [x] SGD, Momentum, and Adam from scratch (`src/optimizers.py`)
+- [x] Gradient check against numerical differentiation
 - [x] Learning-rate sweep replacing an invalid single-point benchmark
-- [x] Phase 2 multiclass: 67.3% three-way, 90.0% collapsed
-- [x] Fleurs experiment — prediction committed before results
-- [x] 16 sequenced documentation files under `docs/`, worked by hand
-      with real numbers
+- [x] Fleurs experiment, prediction committed before results
+- [x] Duplicate contamination found and fixed at the source
+- [x] Dataset rebuilt from Pinterest's official export
+- [x] 17 documentation files, worked by hand with real numbers
+- [ ] Pretrained vision model comparison: how much of the 59.3% →
+      82.5% gap closes when features are learned rather than
+      hand-designed?
 - [ ] Blue-channel ablation: does removing those features tank
       accuracy, or does the model route around them?
-- [ ] Comparison against a pretrained vision model, to measure how
-      much of the fleurs gap closes with learned features
 
-## The uncomfortable question this project doesn't dodge
+## The uncomfortable question this doesn't dodge
 
-If I train a model only on things I've already chosen, and it "learns
-my taste," what has it actually learned? A few honest possibilities,
-not resolved here:
+If I train a model only on things I've already chosen, and it
+"learns my taste," what has it learned?
 
-- It might just be replaying my existing biases back to me —
-  confirming what I already like rather than discovering anything
-  about aesthetics.
-- "Taste" might not be a stable target. My saves from six months ago
-  and today might already disagree, which would show up as noise the
-  model can't fit.
-- There's a real difference between predicting what I'd click and
-  having anything resembling taste in the sense humans mean —
-  intentionality, context, mood, meaning. This measures the first and
-  shouldn't be oversold as the second.
-- Board membership is my own filing decision. Some flower images
-  might reasonably belong to the pink board, which puts an unknown
-  ceiling below 100% that has nothing to do with the model.
-- Scaled up, a system that reliably predicts and reinforces
-  individual aesthetic preference starts to look like the mechanism
-  behind algorithmic feeds and their documented narrowing effects. A
-  toy version is worth understanding precisely because the real
-  version already shapes much of what people see online.
+- It might be replaying my existing biases rather than discovering
+  anything about aesthetics.
+- Taste might not be a stable target — my saves from six months ago
+  and today may already disagree, appearing as noise the model
+  can't fit.
+- Predicting what I'd click is not the same as having taste in the
+  sense humans mean: intentionality, context, mood, meaning. This
+  measures the first.
+- Board membership is my own filing decision. Six near-duplicate
+  groups span two boards, which is direct evidence that some images
+  legitimately belong to both — an unknown ceiling below 100% that
+  has nothing to do with the model.
+- Scaled up, a system that predicts and reinforces individual
+  aesthetic preference looks like the mechanism behind algorithmic
+  feeds and their documented narrowing effects. A toy version is
+  worth understanding because the real version already shapes much
+  of what people see.
 
-I don't think this project resolves any of that. It's small enough
-to let me feel the shape of the question instead of having an
-opinion about it secondhand.
+I don't think this resolves any of that. It's small enough to let me
+feel the shape of the question instead of having an opinion about it
+secondhand.
 
 ## Setup
 
@@ -234,37 +241,31 @@ opinion about it secondhand.
 pip install -r requirements.txt
 ```
 
-Phase 1 — see `LABELING_GUIDE.md` for collecting `data/yes` and
-`data/no`:
+Building the dataset from a Pinterest data export (Settings →
+Privacy and data → request your data):
 
 ```
 cd src
-python3 train.py
+python3 parse_pinterest_export.py ~/path/to/export
+python3 parse_pinterest_export.py ~/path/to/export --download \
+    --board-id <ID> --out ../data/boards/<name> --limit 233
 ```
 
-Phase 2 — one folder per board under `data/boards/`, discovered
-automatically by folder name:
+Verifying it:
 
 ```
-cd src
-python3 dedupe.py ../data/boards/<board>     # within-folder duplicates
-python3 check_board_overlap.py               # cross-folder duplicates
-python3 train_boards.py
+python3 check_near_duplicates.py      # perceptual hash
+python3 check_board_overlap.py        # exact hash, across boards
 ```
 
-With no `data/boards/` present, `train_boards.py` runs the gradient
-check and synthetic training check instead of training.
-
-Predicting on a new image, through both stages:
+Training and analysis:
 
 ```
-python3 predict.py ../path/to/image.jpg
-```
-
-Optimizer comparison:
-
-```
-python3 compare_optimizers.py
+python3 train.py                  # Phase 1
+python3 train_boards.py           # Phase 2
+python3 compare_optimizers.py     # learning-rate sweep
+python3 probe_representation.py   # kNN, width sweep, d-prime
+python3 predict.py ../image.jpg   # both stages on a new image
 ```
 
 Board images are gitignored — the code is public, the Pinterest
@@ -272,16 +273,17 @@ source images stay local.
 
 ## Documentation
 
-`docs/` contains 16 sequenced files building from "what is a neuron"
-to the fleurs experiment, written while learning rather than
-afterward. Derivations are worked by hand with real numbers, and
-places where I was confused are left visible rather than polished
-away.
+`docs/` contains 17 sequenced files building from "what is a neuron"
+to the duplicate contamination post-mortem, written while learning
+rather than afterward. Derivations are worked by hand with real
+numbers, and places where I was confused or wrong are left visible
+rather than polished away. Files 14, 15 and 16 each contain a
+correction to something I had previously reported.
 
 ## Related
 
-Part of a two-project pair with
+Part of a pair with
 [chaos-organizer](https://github.com/ffairylea/chaos-organizer):
-that one is the applied side (using existing ML tools to solve a real
-workflow problem). This one is the fundamentals side (building the ML
-itself from the ground up to understand what those tools are doing).
+that one is the applied side, using existing ML tools to solve a
+workflow problem. This one is the fundamentals side — building the
+machinery to understand what those tools are doing.
