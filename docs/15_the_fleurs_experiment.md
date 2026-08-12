@@ -1,7 +1,9 @@
 # 15 — The fleurs experiment: a prediction made before running it
 
 This file is written **before** Stage 2 has been trained on real
-board data. Nothing in it is informed by the result. 
+board data. Nothing in it is informed by the result. That is the
+point: a prediction recorded after seeing the outcome is not a
+prediction.
 
 ## The setup
 
@@ -23,15 +25,17 @@ been ruled out, so anything the confusion matrix shows is about the
 features, not the file management.
 
 Four overlapping files were found and removed during that check.
-None were real pins; they were Pinterest interface assets
+None were real pins — they were Pinterest interface assets
 (`facebook_share_image.png` and a repeated placeholder) that Imageye
 had scraped alongside the images.
 
 ## Why these three boards specifically
 
+The choice was deliberate rather than convenient.
+
 `winter_minimal` is visually distinct from `pink` — different
 palette, different brightness, different saturation. Separating
-those two should be well within reach of colour-based features.
+those two should be well within reach of color-based features.
 
 `fleurs` was chosen to be **hard on purpose**. Most of the flower
 images are pink. But they belong to a different board, so a correct
@@ -69,8 +73,8 @@ Specifically, before running:
 
 ## Why this is expected
 
-The 32 features (file 01) are, without exception, colour statistics:
-brightness, saturation, contrast, warmth, colour variance, the three
+The 32 features (file 01) are, without exception, color statistics:
+brightness, saturation, contrast, warmth, color variance, the three
 mean channel values, and a 24-bin RGB histogram.
 
 None of them encode shape, texture, edges, or spatial arrangement.
@@ -79,8 +83,8 @@ object is radially symmetric," because every number in it is
 computed by averaging or binning pixel values over the whole image,
 discarding position entirely.
 
-So a pink flower and a pink bedroom, if their colour distributions
-are similar, produce nearly identical feature vectors. The model
+So a pink flower and a pink bedroom, if their color distributions
+are similar, produce **nearly identical feature vectors**. The model
 is not failing to learn a distinction that is available to it — the
 distinction is not present in its input at all.
 
@@ -92,18 +96,19 @@ because none of those change what information reaches the network.
 
 **If the prediction holds** — fleurs collapses into pink while
 winter_minimal separates cleanly — the experiment demonstrates a
-concrete limit of hand-crafted colour features, using this project's
+concrete limit of hand-crafted color features, using this project's
 own data rather than a textbook assertion. It is the empirical case
 for learned features: convolutional layers exist precisely because
 hand-designed features cannot capture shape.
 
 It would also make the two remaining items in the README
 (comparison against a pretrained model, and the blue-channel
-ablation) motivated. A CLIP comparison would
-answer "how much of this gap closes with learned features."
+ablation) motivated rather than decorative. A CLIP comparison would
+answer "how much of this gap closes with learned features," which is
+a specific question rather than a vague one.
 
 **If the prediction fails** — fleurs separates well — then something
-in the colour features does correlate with flowers, and the
+in the color features does correlate with flowers, and the
 interesting work becomes finding out what. Plausible candidates:
 higher `color_variance` from petal-versus-background contrast, more
 weight in green histogram bins from stems and leaves, or lower
@@ -112,7 +117,7 @@ the multiclass weights would identify it.
 
 That outcome would be a genuine discovery about the data and more
 interesting than the predicted one. It would also mean the reasoning
-in this file is wrong in an instructive way: that "colour features
+in this file is wrong in an instructive way: that "color features
 cannot see flowers" was too quick, because flowers may carry a
 color signature that is not the flower itself but its typical
 context.
@@ -133,10 +138,7 @@ Any accuracy claim gets compared against the second number, not the
 first. Guessing the majority class is the trivial strategy a model
 must beat to have done anything at all.
 
-
-
-
-## What a model that could see fleurs does differently
+## What a model that *could* see flowers does differently
 
 The prediction above rests on a claim about representation: shape is
 absent from the input, not merely hard to learn from it. That claim
@@ -147,18 +149,18 @@ shape actually does.
 
 Every one of the 32 features collapses the whole image into a single
 number. `brightness` is the mean pixel value; the histogram bins
-count how many pixels fall in each colour range. Both discard
-where anything is.
+count how many pixels fall in each color range. Both discard
+*where* anything is.
 
 Once position is gone, questions like "is there an edge here" cannot
-be asked, because 'here' no longer exists as a concept. Two images
-with identical colour distributions and completely different
+be asked, because *here* no longer exists as a concept. Two images
+with identical color distributions and completely different
 arrangements produce identical feature vectors. A pink flower and a
 pink wall are, to this model, potentially the same input.
 
 ### Convolution: looking at small patches instead
 
-A convolutional layer avoids that collapse by refusing to summarise
+A convolutional layer avoids that collapse by refusing to summarize
 the whole image at once. It examines small patches, one position at
 a time, with the same small grid of weights — a **kernel** — applied
 at every location.
@@ -206,7 +208,7 @@ preserved rather than averaged away.
 
 The values $-1, 0, +1$ above were chosen by hand for illustration,
 but in a real network they are not chosen at all. A 3×3 kernel is
-nine weights, initialised randomly and trained by exactly the
+nine weights, initialized randomly and trained by exactly the
 machinery derived in files 07 and 13: compute $\partial L / \partial
 w$ for each of the nine, step against the gradient.
 
@@ -220,54 +222,45 @@ decided in advance by a person, and the model can only work with
 what that person thought to compute. A convolutional layer decides
 for itself what to measure.
 
-### Stacking is where shape comes from
+### Stacking, and the limit of what this file can claim
 
-One layer of edge detectors is not enough to see a flower. The
-capability comes from composition:
+One layer of edge detectors is not enough to represent a flower. The
+standard account is that capability comes from composition: layer 1
+detects edges, layer 2 detects combinations of edges such as corners
+and curves, and later layers combine those into parts and objects.
 
-- **Layer 1** takes pixels, outputs maps of edges at various
-  orientations.
-- **Layer 2** takes those edge maps as its input and detects
-  combinations of edges — corners, junctions, curves. A curve is
-  literally a particular arrangement of oriented edges.
-- **Layer 3** combines curves into parts: a rounded lobe, a radial
-  spoke pattern.
-- **Later layers** combine parts into objects. A unit that fires on
-  petal-like arrangements arranged radially around a centre is,
-  functionally, a flower detector.
+**This is reported from the literature, not observed here.** No
+convolutional network exists in this repository. Descriptions of
+what intermediate layers "look for" come from published
+feature-visualisation work, and are stated here as background rather
+than as something this project measured. The honest claim is: this
+is the mechanism I expect would address the fleurs/pink gap, and
+testing it is future work.
 
-At no point does anyone write down what a flower is. The
-representation is built by composing detectors, each layer treating
-the previous layer's output as its input — the same layered
-structure as this project's network, but with position retained at
-every stage instead of discarded at the first.
-
-That composition is why the prediction in this file is about
-representation rather than capacity. A flower is not a colour. It is
-a spatial arrangement, and spatial arrangement is exactly the thing
-that averaging over pixels removes. No amount of extra hidden
-neurons, longer training, or a better optimizer recovers information
-that was destroyed before the network saw it.
+What *is* established by the arithmetic above is narrower and does
+not depend on any of that: convolution retains position, and the 32
+features in `features.py` do not. Whether retaining position would
+actually close this specific gap is an open question that a CLIP
+comparison or a small convolutional layer could answer.
 
 ### Two properties worth noting
 
 **The same kernel is used at every position.** Nine weights are
 reused across the whole image rather than each location having its
-own. This is called weight sharing, and it encodes an assumption: an
-edge is an edge regardless of where it appears. A dense layer of the
-kind used in `model.py` has a separate weight per input position and
-must therefore learn "edge" independently for every location.
+own. This is called weight sharing, and it encodes an assumption:
+an edge is an edge regardless of where it appears. A dense layer of
+the kind used in `model.py` has a separate weight per input position
+and must learn "edge" independently for every location.
 
 **Convolution is still just weighted sums.** Multiply inputs by
 weights, add them up — the same operation as file 03, applied to a
 patch instead of a whole feature vector, and reused across
 positions. It is not a different kind of mathematics; it is the same
-arithmetic organised so that position survives.
-
+arithmetic organized so that position survives.
 
 ## Result
 
-Run on 2026-08-04, 500 epochs, plain gradient descent at $lr = 0.1$
+Run on 2026-08-02, 500 epochs, plain gradient descent at $lr = 0.1$
 (the same configuration as Phase 1 — deliberately, so the two are
 comparable). 150 test images from a stratified 20% split.
 
@@ -315,25 +308,49 @@ The claim was *absorption*: pink flowers being swallowed by the pink
 board. That describes an asymmetric error — many fleurs misread as
 pink, few pink misread as fleurs.
 
-The measurement shows 18 fleurs → pink and 16 pink → fleurs. Very
-nearly symmetric.
+The measurement shows 18 fleurs → pink and 16 pink → fleurs.
 
-Absorption would mean the model has some
-purchase on the distinction and is biased toward one side of it.
-Symmetric confusion means it has no purchase at all: the two boards
-occupy overlapping regions of the feature space, and the model is
-close to guessing between them.
+**How much can be concluded from that?** Less than the first draft
+claimed. It is 18 out of 34 off-diagonal errors, and a proportion of
+18/34 = 0.53 carries a 95% interval of roughly [0.36, 0.70]. That
+interval contains 0.5, so the data is consistent with symmetry — but
+it also contains 0.70, so it is consistent with substantial
+asymmetry. **The result cannot distinguish the two.**
 
-Restricting attention to the 112 fleurs and pink test images, the
-model gets 62.5% of them right — against 50% for a coin flip between
-those two classes. It is barely above chance on the distinction it
-was supposed to find hard, and the failure is mutual rather than
-directional.
+What the data does support is the narrower claim: **no strong
+absorption effect.** If pink flowers were being systematically
+swallowed by the pink board, the errors would run heavily one way,
+and they do not. The prediction of a strong directional effect is
+not supported.
 
-The corrected claim is therefore stronger than the original one. Not
-"flowers look pink so they get called pink," but "flowers and the
-pink board are not separable by colour statistics in either
-direction."
+What it does not support is the stronger reading that the model has
+"no purchase at all" on the distinction. Restricting attention to
+the 112 fleurs and pink test images, the model gets 62.5% right
+against 50% for a coin flip — which is $z \approx 2.65$,
+significantly above chance. Some color signal separating these
+boards does exist; it is simply weak.
+
+(That 62.5% counts as errors the 8 images routed to winter_minimal,
+which were not offered as options in a two-way framing. Restricted
+to the 104 images the model actually placed in {fleurs, pink}, it is
+70/104 = 67.3%. This document uses the more conservative 62.5%
+throughout.)
+
+The corrected claim is therefore: **fleurs and pink are weakly
+separable by color statistics — significantly above chance, but far
+below what the same features achieve on distinctions they can
+express — with no strong directional bias in either direction.**
+
+This is narrower than the first draft's "not separable in either
+direction," which overshot the project's own measurement.
+
+A note on the standard being applied here. This document states
+later that a one-image difference between fleurs and pink recall
+"should not be interpreted." The 18-versus-16 split is a
+two-image difference, and the first draft built its central
+narrative on it. The rigor was applied selectively, in the
+direction that favored the conclusion — which is the same failure
+file 14 documents, appearing again in a different form.
 
 ### The number that isolates the variable
 
@@ -343,34 +360,119 @@ distinction the features cannot express — gives:
 
 **90.0% accuracy.**
 
-Phase 1, the binary yes/no task, achieved 89.25%.
+That figure needs its baseline stated, and the first draft of this
+file omitted it — which mattered, because the omission flattered the
+result. Collapsed, the classes are 112 pink-ish against 38
+winter_minimal, so **always guessing "pink-ish" scores 74.7%**. The
+90.0% is therefore +15.3 points over trivial, while Phase 1's 89.25%
+was +29.25 over its own 60% baseline.
 
-The model performs essentially identically on the distinction color
-can represent, and collapses on the one it cannot. That rules out
-the alternative explanations:
+So the two numbers are *not* "essentially identical" in any
+meaningful sense, and an earlier version of this document claimed
+they were. Measured against their respective baselines, the
+collapsed task is the less impressive of the two.
 
-- **Not model capacity.** The same network, same width, same
-  training, reaches 90% when asked a colour-expressible question.
-- **Not optimisation.** The loss was still falling at epoch 500;
-  training longer or switching to Adam would improve fit, not supply
-  missing information.
-- **Not data volume.** 190 winter_minimal images support 81.6%
-  recall, while 286 fleurs images support 61.4%. The board with
-  *fewer* examples is classified *better*.
-- **Not class imbalance.** If imbalance were driving the result, the
-  errors would skew toward the larger class. They are symmetric.
+The figure that survives this objection is **balanced accuracy** —
+the mean of the per-class recalls, which is unaffected by class
+sizes:
 
-What remains is representation. `fleurs` and `pink` differ in
-subject matter, and subject matter is a spatial property. The 32
-features average and bin over the whole image, discarding position
-before the network sees anything. The information required to
-separate these two boards is not present in the input.
+$$\frac{92.9\% + 81.6\%}{2} = 87.2\%$$
 
-A further detail supports this. Only 7.1% of fleurs and pink images
-were misrouted to winter_minimal, while 18.4% of winter_minimal
-images were misrouted to one of the other two. The boundary the
-features *can* express is respected in both directions; the failure
-is localised precisely where the prediction said it would be.
+Both classes are recognized well above chance, and the model is not
+simply riding the larger class. **87.2% is the number this section
+should be read on.**
+
+With that correction, the comparison still does the work it was
+meant to do: the model separates pink-ish from winter_minimal
+strongly while performing near chance on fleurs versus pink. The
+following alternative explanations are argued against below, with
+varying degrees of success — two of them are ruled out, and two are
+not yet ruled out at all.
+
+**Class imbalance — ruled out.** fleurs has 286 images and pink 275;
+in the test split that is 57 against 55. There is no meaningful
+imbalance between the two confused classes for imbalance to explain.
+(Listing this as an eliminated alternative in the first draft was
+close to vacuous, and inflated the apparent number of explanations
+ruled out.)
+
+**Data volume, in the crude sense — argued against, not ruled out.**
+190 winter_minimal images support 81.6% recall while 286 fleurs
+images support 61.4%, so the board with *fewer* examples is
+classified *better*. That shows raw count is not the whole story,
+but it confounds volume with difficulty and does not answer the
+actual question: would more fleurs and pink images improve the
+fleurs/pink boundary specifically? A learning curve — training on
+25%, 50%, 75% and 100% of that data and checking whether the 62.5%
+is rising or flat — would answer it. **Not yet run.**
+
+**Model capacity — NOT ruled out.** The first draft argued that the
+same network reaching 90% on a color-expressible question shows
+width is sufficient. That is a non sequitur: showing an easy
+question is answerable at a given width says nothing about whether a
+harder one needs more. On the binary task, holding everything else
+fixed, width is worth several points:
+
+    hidden =  8    test 89.2%
+    hidden = 16    test 91.4%
+    hidden = 64    test 93.5%
+
+A three-way width sweep has **not been run**, so capacity remains a
+live alternative.
+
+**Optimisation — NOT ruled out.** The run above uses $lr = 0.1$, and
+file 14 establishes on this project's own data that $lr = 0.1$ is
+undertuned by 5.4 points on the binary task (89.2% against 94.6% at
+$lr = 0.3$). The first draft argued the loss was still falling at
+epoch 500 as evidence optimization would not help — which is an
+argument that it *would*. This is also structurally the same error
+file 14 exists to document: a single arbitrary hyperparameter per
+condition measures the hyperparameter, not the method. A swept-$lr$
+three-way comparison has **not been run**.
+
+### What this means for the conclusion
+
+Two of four alternatives are eliminated; two are not. The likely
+size of the gap matters here: undertuning is worth roughly 5 points
+and width roughly 4 on the binary task, so even generously, closing
+both would put the three-way result somewhere in the low-to-mid
+70s — still far below the 87.2% balanced accuracy achieved once the
+fleurs/pink distinction is removed. The conclusion very probably
+survives. But *probably survives* is different from *demonstrated*,
+and the honest status of this claim is the former.
+
+There is also a deeper objection the first draft did not address at
+all. Every argument here concerns the behavior of one network,
+while the conclusion is about the *feature space*. Showing that this
+model fails does not show that no model on these 32 features could
+succeed.
+
+The direct test is small: run k-nearest-neighbours on the normalized
+features, fleurs against pink. kNN is nonparametric and effectively
+unlimited in capacity, so if it also lands near 62%, that is a
+statement about the features rather than about any particular
+network. Ten lines of numpy, entirely within the project's
+constraints, and **not yet run.** Until it is, "representation" is
+the most plausible explanation rather than a demonstrated one.
+
+The mechanism, if it is right: `fleurs` and `pink` differ in subject
+matter, subject matter is spatial, and all 32 features average or
+bin over the whole image, discarding position before the network
+sees anything.
+
+### A detail the first draft read backwards
+
+7.1% of fleurs and pink images were misrouted to winter_minimal,
+while 18.4% of winter_minimal images were misrouted to one of the
+other two. The first draft read this as the expressible boundary
+being "respected in both directions."
+
+It is the opposite. winter_minimal images are misrouted at roughly
+2.6 times the rate, which is a bias toward the larger group —
+exactly the class-prior effect dismissed a few paragraphs earlier.
+The dismissal concerned fleurs versus pink, where the classes really
+are balanced, but the collapsed comparison has 112 pink-ish against
+38 winter, and that asymmetry does show up in the predictions.
 
 ### What this establishes
 
@@ -379,14 +481,14 @@ than asserted. A convolutional network of the kind described above
 would attack this exact gap: it retains position, composes edges
 into curves and curves into parts, and can therefore represent
 "radially arranged petal shapes" — a thing that has no expression in
-a colour histogram.
+a color histogram.
 
 The remaining README items are now motivated by a specific number
 rather than by general curiosity. A comparison against a pretrained
 vision model would answer how much of the 62.5% → ceiling gap closes
 when features are learned instead of hand-designed. The blue-channel
 ablation asks a related question from the other side: how much of
-the working 90% depends on a narrow colour shortcut.
+the working 90% depends on a narrow color shortcut.
 
 ### Honest caveats
 

@@ -103,23 +103,32 @@ symmetric, which means the model has no purchase on the distinction
 rather than a biased one. Restricted to those two boards it scores
 62.5%, barely above a coin flip.
 
-**The number that isolates the cause:** collapsing fleurs and pink
-into one class — asking only "pink-ish or winter_minimal" and
-ignoring the distinction color cannot express — gives **90.0%**.
-Phase 1 got 89.25%.
+**The comparison that isolates the cause:** collapsing fleurs and
+pink into one class — asking only "pink-ish or winter_minimal" and
+ignoring the distinction color cannot express — gives 90.0% raw, or
+**87.2% balanced accuracy** (the mean of per-class recalls, which is
+the figure to read since the collapsed classes are 112 vs 38 and the
+majority baseline is 74.7%).
 
-The same network, same width, same training, performs identically
-well on the distinction color *can* represent and collapses on the
-one it can't. That rules out capacity, optimization, data volume
-(190 winter images support better recall than 286 fleurs images),
-and class imbalance. What remains is representation: subject matter
-is spatial, and every one of the 32 features averages or bins over
-the whole image, discarding position before the network sees
-anything.
+So the model separates pink-ish from winter_minimal strongly while
+scoring 62.5% on fleurs versus pink — significantly above the 50%
+coin flip, but weakly so.
 
-This is the empirical case for learned features, measured on my own
-data rather than asserted from a textbook. Full analysis and caveats
-in `docs/15`.
+The likely explanation is representation: subject matter is spatial,
+and every one of the 32 features averages or bins over the whole
+image, discarding position before the network sees anything. Class
+imbalance is ruled out (the two confused boards are 57 vs 55 in
+test). Capacity and optimization are **not yet ruled out** — the run
+uses one width and one untuned learning rate, and `docs/14` shows
+that same learning rate is undertuned by 5.4 points on the binary
+task.
+
+`src/probe_representation.py` addresses the deeper objection that
+all of this measures one network's behavior while the conclusion is
+about the feature space: it runs kNN (nonparametric, unlimited
+capacity) on fleurs vs pink, sweeps hidden width, and computes
+per-feature separation with no model involved. Full analysis and the
+honest status of each claim in `docs/15`.
 
 ## Verifying the math before trusting it
 

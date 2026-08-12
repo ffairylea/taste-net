@@ -73,7 +73,7 @@ That's the **standard deviation**: brightness values in this set
 typically sit about 0.14 away from 0.6.
 
 (Note this is the same variance idea as `color_variance` in
-`features.py`, which measures spread of colour *within* one image.
+`features.py`, which measures spread of color *within* one image.
 Here it measures spread of one feature *across* images. Same
 formula, different axis.)
 
@@ -205,7 +205,7 @@ system, which is the only system where the weights mean anything.
 
 `predict.py` also refuses to run against a weights file that has no
 saved normalization stats, rather than guessing. Given that the
-wrong behaviour here is invisible, failing loudly is the only safe
+wrong behavior here is invisible, failing loudly is the only safe
 option.
 
 ## Related: why normalization stats come from training only

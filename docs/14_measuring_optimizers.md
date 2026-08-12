@@ -1,7 +1,8 @@
 # 14 — Measuring the optimizers, and getting it wrong first
 
 File 13 derived momentum and Adam. This file is about testing
-whether they actually help on this dataset; also it's about a mistake in the first attempt at that test, which is the more useful half.
+whether they actually help on this dataset — and about a mistake in
+the first attempt at that test, which is the more useful half.
 
 ## The first comparison, and why it was invalid
 
@@ -48,7 +49,7 @@ arbitrary values, which means it carries no information.
 
 What made it worth checking was that the result was too flattering.
 A sixfold speedup from swapping an update rule on a two-layer
-network with 466 training images is not a plausible magnitude. The
+network with 373 training images is not a plausible magnitude. The
 suspicion came from the size of the claim, not from spotting the
 error directly.
 
@@ -120,7 +121,7 @@ Momentum matches plain SGD almost exactly — same best accuracy, same
 
 This is not a bug, and the reason follows from file 13. Momentum
 exists to average out *noise* in the gradient. But training here is
-**full-batch**: every gradient is computed over all 466 images at
+**full-batch**: every gradient is computed over all 373 training images at
 once, so successive gradients are near-identical rather than noisy
 samples. Averaging near-identical values changes almost nothing.
 
@@ -154,7 +155,7 @@ closely stopped corresponding to performing better on unseen data.
 The plot makes the mechanism visible too. The $lr = 2.0$ curve is
 visibly jagged rather than smooth — the steps are large enough to
 overshoot repeatedly, and the run ends up in a sharper, less
-generalisable minimum.
+generalizable minimum.
 
 ## Effect on the project's headline number
 

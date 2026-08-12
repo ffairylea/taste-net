@@ -78,7 +78,7 @@ guess matters much less.
 
 ## Problem 1: the gradient is a noisy estimate
 
-The gradient is computed from the 466 images in this dataset — not
+The gradient is computed from the 373 training images — not
 from some underlying truth about images in general. It's a sample
 estimate, so it wobbles.
 
@@ -127,7 +127,7 @@ decays to about a third over that span.
 Look again at those numbers. After four steps the average reads
 0.17, but the true gradient is 0.5. That isn't the noise — it's a
 systematic undercount, in the same direction every time, and it has
-an obvious cause: $m$ was initialised to **0**.
+an obvious cause: $m$ was initialized to **0**.
 
 Zero is not a neutral starting value. It is an assertion that the
 gradient is zero. Every early update is therefore a compromise
@@ -154,7 +154,7 @@ The step actually taken is $lr \cdot m$ — the learning rate times
 the averaged gradient. So an $m$ of 0.7 when the truth is 7 produces
 a step ten times smaller than intended. Training crawls during the
 early epochs for a reason that has nothing to do with the loss
-surface and everything to do with an initialisation artifact.
+surface and everything to do with an initialization artifact.
 
 This is not fatal — the average does converge eventually — but the
 first several dozen updates are wasted, and those are precisely the
@@ -297,12 +297,39 @@ Momentum fixes the noise problem. It does nothing about a second
 one: **a single learning rate has to serve every weight in the
 network.**
 
-Different weights have gradients of wildly different sizes. The
-blue-channel histogram weights, which file 09 showed the model leans
-on heavily, produce much larger gradients than a weight attached to
-a feature the model barely uses. Whatever value of $lr$ gets chosen
-is simultaneously too large for some weights and too small for
-others. It is always a compromise.
+Different weights can have gradients of very different sizes, so
+whatever value of $lr$ gets chosen may be simultaneously too large
+for some weights and too small for others.
+
+**How much does this actually matter in this project?** Measured
+after 500 epochs of training, across the 32 input features:
+
+    gradient magnitude spread across features:  3.3x
+    correlation between |W1| and |dW1|:         0.10
+
+Only 3.3x, and weight magnitude is essentially *uncorrelated* with
+gradient magnitude. An earlier draft of this file claimed that
+heavily-weighted features — the blue-channel histogram bins the
+model leans on, per the feature importance output in the README —
+produce correspondingly large gradients. That claim was false, and
+the reason it has to be false follows from file 12: every input
+column is z-scored to unit variance before training, and since
+$dW_1 = X^\top dZ_1 / n$, the input columns entering that product
+all have comparable scale. Normalization has already removed most
+of the disparity Adam's per-weight step size exists to handle.
+
+Two things follow. First, large weight does not imply large
+gradient — at convergence it often implies the opposite, since a
+weight that has stopped moving has a small gradient by definition.
+Second, the honest motivation for the second moment in *this*
+project is not input feature scale. It is that gradient scales still
+differ **across layers** ($W_1$ versus $W_2$ receive gradients
+through different numbers of chain-rule factors) and across training
+time, neither of which normalization addresses.
+
+The general argument for adaptive step sizes stands. Its magnitude
+here is modest, and file 14 measures what it is worth in practice
+rather than assuming.
 
 Adam's answer is to give every weight its own effective step size,
 derived from its own history.
@@ -328,7 +355,7 @@ $$9,\quad 9,\quad 9,\quad 9$$
 
 Average 9. The sign is gone; the size survives.
 
-This is the same manoeuvre used for variance in file 12, for the
+This is the same maneuver used for variance in file 12, for the
 same reason. Distances from a mean sum to zero by construction, so
 they get squared before averaging. Here, gradients around a
 direction cancel, so they get squared before averaging. Identical
@@ -369,7 +396,7 @@ The only change is that $g$ has been replaced by
 $\hat m / (\sqrt{\hat v} + \varepsilon)$: the direction, smoothed
 and de-biased, divided by its own typical magnitude.
 
-### Why this equalises the step sizes
+### Why this equalizes the step sizes
 
 Two weights with very different gradient scales, both at
 $lr = 0.01$:
@@ -383,7 +410,7 @@ $$\hat v \approx 100 \quad\Rightarrow\quad \sqrt{\hat v} = 10 \quad\Rightarrow\q
 $$\hat v \approx 0.01 \quad\Rightarrow\quad \sqrt{\hat v} = 0.1 \quad\Rightarrow\quad \text{step} = 0.01 \cdot \frac{0.1}{0.1} = 0.01$$
 
 Both move by 0.01, despite gradients differing by a factor of 100.
-Each weight's step has been normalised by its own characteristic
+Each weight's step has been normalized by its own characteristic
 gradient size.
 
 This is why $lr$ matters much less under Adam than under plain
@@ -394,6 +421,20 @@ learning-rate sensitivity measured in file 14.
 
 $\beta_1 = 0.9$ averages over roughly the last 10 gradients;
 $\beta_2 = 0.999$ over roughly the last 1000.
+
+**Where "roughly 10" and "roughly 1000" come from.** The weight the
+EMA assigns to the gradient from $k$ steps ago is
+$(1-\beta)\beta^k$, so the total weight across all past steps is a
+geometric series summing to 1 — the same series used for bias
+correction above. The average *age* of the contributions is:
+
+$$\sum_{k=0}^{\infty} k\,(1-\beta)\beta^k = \frac{\beta}{1-\beta}$$
+
+For $\beta = 0.9$ that gives $0.9/0.1 = 9$ steps; for
+$\beta = 0.999$, $0.999/0.001 = 999$. Hence the usual shorthand of
+$1/(1-\beta)$ — 10 and 1000 respectively. The figures are not
+arbitrary conventions; they are the mean lag of the average being
+computed.
 
 The asymmetry is deliberate. Direction should adapt quickly — when
 the descent direction genuinely changes, the optimizer needs to
@@ -423,11 +464,18 @@ for $m$ is load-bearing for $v$.
 
 ### $\varepsilon$
 
-$\sqrt{\hat v}$ can be exactly zero — a permanently dead ReLU
-produces a gradient of zero on every step, so its squared average is
-zero forever. Those weights appeared in the gradient check output in
-file 11 as entries reading exactly `0.00000000` from both the
-analytic and numerical methods.
+$\sqrt{\hat v}$ can be exactly zero — a ReLU whose gate stays closed
+produces a gradient of zero on every step it stays closed, so its
+squared average stays at zero. Weights in that state appeared in the
+gradient check output as entries reading exactly `0.00000000` from
+both the analytic and numerical methods.
+
+Worth being precise about what that output does and does not show:
+it was produced on synthetic data at initialization, before any
+training. It demonstrates that those weights were dead *at that
+step*, not that they were permanently dead. Establishing permanence
+would require tracking them across training, which has not been
+done.
 
 Adding $\varepsilon = 10^{-8}$ prevents the division from failing.
 It plays the same defensive role as the `std == 0` guard in
