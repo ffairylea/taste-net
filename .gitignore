@@ -5,3 +5,4 @@ venv/
 *.npz
 .DS_Store
 data/boards/
+data/
