@@ -36,7 +36,7 @@ The picture:
                     v
                  prediction
 
-So: **layer** = a horizontal group, a processing stage. **Neuron** =
+So: layer = a horizontal group, a processing stage; neuron =
 one individual unit inside that group. My network has 2 layers total
 (hidden + output) but 9 neurons total (8 in the hidden layer, 1 in
 the output layer).

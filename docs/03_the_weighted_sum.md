@@ -25,11 +25,11 @@ So 0.34 is the neuron's raw score.
 - The result (0.34) = **z** (raw score)
 
 So z = xW + b is just "multiply each input by its weight, add them
-up, add the bias" — written with letters so the same recipe can be
+up, add the bias" & the same recipe can be
 reused for all 29 real features, 8 neurons, ~450 images, and 500
 rounds of training, without rewriting the arithmetic every time.
 
-Where do W and b actually come from? Not chosen by me — they start
+Where do W and b actually come from? They start
 as small random numbers, then get automatically adjusted by training
 (gradient descent, explained later :) based on what reduces error on my real labeled
 images.
@@ -56,9 +56,6 @@ sit wherever the real data actually needs it. Weights control the
 boundary's angle/tilt; bias controls its position.
 
 ## Why 8 neurons specifically?
-
-(picked 8 as a reasonable middle-ground guess for ~450 images — not
-derived from a formula, worth testing other values later)
 
 More neurons = more capacity to detect complex patterns, but also
 more risk of overfitting with limited data. There's no rule saying

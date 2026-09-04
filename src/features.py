@@ -2,15 +2,11 @@
 features.py
 
 Turns an image into a feature vector — a list of numbers describing it.
-This is the "linear algebra" step: an image goes from a grid of pixels
+An image goes from a grid of pixels
 to a single point in N-dimensional space. Everything downstream (the
 model, the math, the learning) happens on these vectors, not on raw
 pixels. Raw pixels would need way more data than we have (150-300
-images) to learn anything real — that's the classic overfitting trap.
-
-Every feature here is something YOU could compute by hand on a small
-image if you had a calculator and a lot of patience. Nothing is a
-black box.
+images) to learn anything real.
 """
 
 from PIL import Image
@@ -20,7 +16,7 @@ import numpy as np
 def load_image(path, size=(64, 64)):
     """Load an image, force it to RGB, resize to a fixed size.
     Fixed size matters: every image needs to produce a feature
-    vector of the SAME length so we can compare / train on them."""
+    vector of the same length so we can compare / train on them."""
     img = Image.open(path).convert("RGB")
     img = img.resize(size)
     return np.array(img) / 255.0  # scale pixel values to [0, 1]
