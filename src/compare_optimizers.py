@@ -94,42 +94,69 @@ def main():
         print()
 
     # --- the actual conclusion, computed rather than asserted ---
+    #
+    # An earlier version of this script printed a fixed paragraph
+    # here. After the dataset rebuild its numbers changed and the
+    # paragraph kept printing the old reading, which was then wrong
+    # in the opposite direction. Interpretation that is hardcoded
+    # eventually prints a falsehood, so everything below is derived
+    # from the measurements.
+    one_image = 1.0 / len(y_test)
     print("=" * 62)
     print("Sensitivity to learning rate (the honest comparison):")
     print("=" * 62)
+    print(f"  {len(y_test)} test images, so one image = "
+          f"{one_image:.1%} of accuracy.\n")
+
+    summary = {}
     for name, rows in all_results.items():
         accs = [te for _, _, _, te, _ in rows]
+        summary[name] = (max(accs), max(accs) - min(accs))
         print(f"  {name:<10s} best test {max(accs):.1%}, "
               f"spread across lr {max(accs) - min(accs):.1%}")
 
-    print("""
-Reading this: the best achievable accuracy is similar across all
-three — a tuned SGD is competitive with Adam on this problem. What
-differs is the SPREAD. SGD's result depends heavily on guessing a
-good learning rate; Adam lands in a narrow band across a wide range
-of settings.
+    bests = [b for b, _ in summary.values()]
+    best_range = max(bests) - min(bests)
+    spreads = {n: s for n, (_, s) in summary.items()}
+    tightest = min(spreads, key=spreads.get)
+    widest = max(spreads, key=spreads.get)
 
-That robustness, not raw speed, is Adam's real advantage here. On a
-small tabular problem like this one there is no dramatic speedup to
-be had — the honest claim is 'less tuning needed', which is a
-smaller claim than the first version of this script implied.""")
+    print(f"\n  Best-accuracy range across optimizers: {best_range:.1%} "
+          f"({best_range / one_image:.0f} test images out of {len(y_test)})")
+    print("  -> this is a single split, so it cannot rank the optimizers\n"
+          "     no matter which way it comes out. Treat the ordering as\n"
+          "     unmeasured until it is run across several seeds.")
 
-    # Overfitting check: does the lowest training loss give the best
-    # test accuracy? Not necessarily, and that gap is worth seeing.
+    ratio = spreads[widest] / max(spreads[tightest], 1e-9)
+    print(f"\n  Widest spread: {widest} ({spreads[widest]:.1%}). "
+          f"Tightest: {tightest} ({spreads[tightest]:.1%}).")
+    print(f"  {widest} is {ratio:.1f}x more sensitive to the learning "
+          f"rate than {tightest}.")
+    print("  That sensitivity gap, not peak accuracy, is what this\n"
+          "  benchmark actually measures. See docs/14 for the reading.")
+
+    # Overfitting check: sort every run by final training loss and
+    # show what the train/test gap does. The gap is a much larger
+    # effect than the test-accuracy differences, so it survives the
+    # sample size where a ranking would not.
     print("=" * 62)
-    print("Lowest training loss vs best test accuracy:")
+    print("Training loss vs the train/test gap:")
     print("=" * 62)
-    for name, rows in all_results.items():
-        by_loss = min(rows, key=lambda r: r[1][-1])
-        by_acc = max(rows, key=lambda r: r[3])
-        note = "same" if by_loss[0] == by_acc[0] else "DIFFERENT"
-        print(f"  {name:<10s} lowest loss at lr={by_loss[0]:g} "
-              f"(test {by_loss[3]:.1%}), best test at lr={by_acc[0]:g} "
-              f"(test {by_acc[3]:.1%})  -> {note}")
-    print("""
-Where these differ, the run that fit the training data best did NOT
-generalize best — the definition of overfitting, visible directly in
-this project's own numbers rather than as a textbook warning.""")
+    flat = [(f"{name} lr={lr:g}", losses[-1], tr, te)
+            for name, rows in all_results.items()
+            for lr, losses, tr, te, _ in rows]
+    flat.sort(key=lambda r: -r[1])
+    print(f"  {'run':<22s} {'loss':>8s} {'train':>8s} {'test':>8s} {'gap':>8s}")
+    for label, loss, tr, te in flat:
+        print(f"  {label:<22s} {loss:>8.4f} {tr:>7.1%} {te:>7.1%} "
+              f"{tr - te:>+7.1%}")
+
+    lo, hi = flat[-1], flat[0]
+    print(f"\n  Lowest loss ({lo[1]:.4f}) vs highest ({hi[1]:.4f}): "
+          f"training accuracy\n  moves {hi[2]:.1%} -> {lo[2]:.1%}, "
+          f"test accuracy moves {hi[3]:.1%} -> {lo[3]:.1%}.")
+    print("  Fitting the training set harder is not buying test accuracy.\n"
+          "  That is overfitting, in this project's own numbers.")
 
     _plot(all_results)
 
@@ -159,8 +186,12 @@ def _plot(all_results):
     out = "../docs/evidence/optimizer_comparison.png"
     fig.savefig(out, dpi=150, bbox_inches="tight")
     print(f"Plot saved to {out}")
-    print("Note the spread within each panel — SGD's curves fan out "
-          "widely,\nAdam's cluster tightly. That visual IS the finding.")
+    print("This plots TRAINING LOSS. The learning-rate sensitivity "
+          "result above\nis about TEST ACCURACY and is not visible here — "
+          "don't read it off\nthis figure. What the figure does show: SGD "
+          "at lr=1 and lr=2 is\njagged where everything else is smooth "
+          "(overshooting), and Adam\nreaches far lower training loss than "
+          "SGD ever does, which bought\nno test accuracy at all.")
 
 
 if __name__ == "__main__":

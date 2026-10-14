@@ -1,9 +1,15 @@
 # 15 — The fleurs experiment: a prediction made before running it
 
 This file is written **before** Stage 2 has been trained on real
-board data. Nothing in it is informed by the result. That is the
-point: a prediction recorded after seeing the outcome is not a
-prediction.
+board data. 
+
+> **Status.** The prediction below stands as recorded. Everything
+> from "## Result" onward was measured on the Imageye dataset that
+> file 16 later found to be 67.9% near-duplicates, so those numbers
+> are not usable. The clean re-run is in file 16 and the README. The
+> prediction section is left exactly as committed, because editing a
+> prediction after seeing the outcome would defeat the point of
+> having made one.
 
 ## The setup
 
@@ -30,8 +36,6 @@ None were real pins — they were Pinterest interface assets
 had scraped alongside the images.
 
 ## Why these three boards specifically
-
-The choice was deliberate rather than convenient.
 
 `winter_minimal` is visually distinct from `pink` — different
 palette, different brightness, different saturation. Separating
@@ -406,54 +410,86 @@ fleurs/pink boundary specifically? A learning curve — training on
 25%, 50%, 75% and 100% of that data and checking whether the 62.5%
 is rising or flat — would answer it. **Not yet run.**
 
-**Model capacity — NOT ruled out.** The first draft argued that the
-same network reaching 90% on a color-expressible question shows
-width is sufficient. That is a non sequitur: showing an easy
-question is answerable at a given width says nothing about whether a
-harder one needs more. On the binary task, holding everything else
-fixed, width is worth several points:
+**Model capacity — ruled out, but only after file 16.** The first
+draft argued that the same network reaching 90% on a
+color-expressible question shows width is sufficient. That is a non
+sequitur: showing an easy question is answerable at a given width
+says nothing about whether a harder one needs more.
 
-    hidden =  8    test 89.2%
-    hidden = 16    test 91.4%
-    hidden = 64    test 93.5%
+The sweep this called for now exists in `probe_representation.py`.
+On the contaminated data it appeared to *refute* this file — three-way
+accuracy climbed to 95.2% at 128 hidden units. On clean data, five
+seeds per width:
 
-A three-way width sweep has **not been run**, so capacity remains a
-live alternative.
+    width   train    test
+        4   63.0%   54.2% +/- 2.0%
+        8   66.3%   58.8% +/- 3.4%
+       16   71.4%   58.5% +/- 2.0%
+       32   77.7%   55.9% +/- 3.0%
+       64   85.1%   56.9% +/- 3.8%
+      128   91.5%   56.5% +/- 3.5%
 
-**Optimisation — NOT ruled out.** The run above uses $lr = 0.1$, and
-file 14 establishes on this project's own data that $lr = 0.1$ is
-undertuned by 5.4 points on the binary task (89.2% against 94.6% at
-$lr = 0.3$). The first draft argued the loss was still falling at
-epoch 500 as evidence optimization would not help — which is an
-argument that it *would*. This is also structurally the same error
-file 14 exists to document: a single arbitrary hyperparameter per
-condition measures the hyperparameter, not the method. A swept-$lr$
-three-way comparison has **not been run**.
+Train accuracy climbs 28 points, test accuracy does not move outside
+noise. Extra capacity buys memorization and nothing else, which is
+what "the information is not in the input" predicts.
+
+**Optimization — argued against, still not directly measured.** The
+run above uses $lr = 0.1$, and the first draft argued that the loss
+was still falling at epoch 500 as evidence optimization would not
+help — which is an argument that it *would*. This is also
+structurally the same error file 14 exists to document: a single
+arbitrary hyperparameter per condition measures the hyperparameter,
+not the method.
+
+What file 14 now shows on clean data is that optimizer and learning
+rate move the *binary* headline by at most 2.8 points (72.9% default
+against a 75.7% best, which is two test images), and that every
+setting which drives the training loss lower buys training accuracy
+without buying test accuracy. That makes it unlikely the three-way
+result is undertuning. But a swept-$lr$ three-way comparison is
+still **not run**, so this is an inference from the sibling task
+rather than a measurement of this one.
 
 ### What this means for the conclusion
 
-Two of four alternatives are eliminated; two are not. The likely
-size of the gap matters here: undertuning is worth roughly 5 points
-and width roughly 4 on the binary task, so even generously, closing
-both would put the three-way result somewhere in the low-to-mid
-70s — still far below the 87.2% balanced accuracy achieved once the
-fleurs/pink distinction is removed. The conclusion very probably
-survives. But *probably survives* is different from *demonstrated*,
-and the honest status of this claim is the former.
+Three of the four alternatives are now eliminated on clean data —
+imbalance, capacity, and (indirectly) optimization — and the crude
+data-volume argument is still an argument rather than a measurement.
 
-There is also a deeper objection the first draft did not address at
-all. Every argument here concerns the behavior of one network,
-while the conclusion is about the *feature space*. Showing that this
-model fails does not show that no model on these 32 features could
+There was also a deeper objection the first draft did not address at
+all. Every argument here concerns the behavior of one network, while
+the conclusion is about the *feature space*. Showing that this model
+fails does not show that no model on these 32 features could
 succeed.
 
-The direct test is small: run k-nearest-neighbours on the normalized
-features, fleurs against pink. kNN is nonparametric and effectively
-unlimited in capacity, so if it also lands near 62%, that is a
-statement about the features rather than about any particular
-network. Ten lines of numpy, entirely within the project's
-constraints, and **not yet run.** Until it is, "representation" is
-the most plausible explanation rather than a demonstrated one.
+`probe_representation.py` was written to close that gap, and the
+honest summary of what it found is mixed. Two checks, clean data,
+five splits each:
+
+**kNN, fleurs vs pink** (chance 50.5%): k=1 64.1% ±2.5, k=5 63.9%
+±2.9, k=15 55.4% ±3.8. A method with unlimited capacity peaks around
+64%, in the same region as the network.
+
+**Per-feature d′, no model involved at all:** fleurs vs pink has a
+best single feature at d′ = 0.63 and a mean of 0.24; pink-ish vs
+winter_minimal has a best of 0.88 and a mean of 0.38. The ratio of
+means is 1.6×.
+
+The d′ comparison is the stronger of the two, because it measures
+the features directly with nothing fitted. The kNN result needs a
+caveat the first version of this section would have skipped: on
+`pink` vs `winter_minimal`, the pair the features *can* express, kNN
+reaches only 69.0% while the network reaches 82.5% balanced
+accuracy. kNN is therefore not a clean upper bound on this data — it
+is simply a weaker classifier here, probably because plain Euclidean
+distance over 32 z-scored color statistics is a poor metric. Its 64%
+on fleurs/pink is consistent with the representation claim but
+cannot establish it alone.
+
+So: the conclusion survived the rebuild and survived a capacity
+sweep designed to break it, and the model-free d′ numbers point the
+same way. The thing that would settle it is still the comparison
+against learned features, which is listed in the README as not done.
 
 The mechanism, if it is right: `fleurs` and `pink` differ in subject
 matter, subject matter is spatial, and all 32 features average or

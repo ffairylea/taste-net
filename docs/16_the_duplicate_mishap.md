@@ -120,8 +120,10 @@ points. The gap was contamination, not overfitting.
 **The width sweep reversed.** On contaminated data, three-way
 accuracy climbed from 70.8% at 8 hidden units to 95.2% at 128 —
 apparently proving that file 15 was wrong and capacity was the
-binding constraint. On clean data the same sweep is flat, 56–63%
-across all widths.
+binding constraint. On clean data the same sweep is flat: test
+accuracy runs 54.2% to 58.8% across widths 4 to 128, every value
+inside every other value's error bar, while train accuracy climbs
+from 63.0% to 91.5%.
 
 The mechanism is clear in hindsight. Extra capacity was not learning
 better features; it was memorizing more twins. The 95.2% measured
@@ -178,11 +180,27 @@ honest question.
 ## What this changes about the conclusions
 
 File 15's central claim survived. On clean data, fleurs versus pink
-runs at 59.3% against a 50% baseline (not statistically significant)
-while pink-ish versus winter_minimal reaches 82.5% balanced
-accuracy — with the same features, same network, same run. The width
-sweep is flat and kNN hits the same ceiling. Representation, not
-capacity.
+runs at 59.3% against a 50% baseline ($z = 1.78$, not statistically
+significant) while pink-ish versus winter_minimal reaches 82.5%
+balanced accuracy — with the same features, same network, same run.
+The width sweep is flat, and the per-feature d′ separation is 1.6×
+larger for the pair that works than for the pair that doesn't.
+Representation, not capacity.
+
+Two honest limits on that. The kNN probe is weaker evidence than it
+first appears: on `pink` vs `winter_minimal` it reaches only 69.0%
+where the network reaches 82.5%, so kNN is not a capacity-unlimited
+*upper bound* on this data, just a differently-shaped classifier
+that happens to be worse at the easy pair too. And the headline
+three-way figure deserves a note of its own — `train_boards.py` at
+its default split reports 66.4%, while the same architecture across
+five splits in `probe_representation.py` averages 58.8% ±3.4. The
+single-split number is roughly two standard deviations high. The
+multi-seed figure is the one to quote.
+
+The second of those is the same mistake as the duplicates in a
+milder form: a number that looked better than it should have, left
+unquestioned because it was the number already written down.
 
 But the claim had to be re-established, because the evidence
 originally offered for it was measured on unusable data. Being right

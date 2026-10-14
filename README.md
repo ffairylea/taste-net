@@ -29,7 +29,13 @@ any training run. The result, on 137 test images:
 | **pink** | 9 | **29** | 8 |
 | **winter_minimal** | **0** | 9 | **37** |
 
-**66.4% three-way accuracy** against a 33.3% chance baseline.
+**66.4% three-way accuracy** against a 33.3% chance baseline, on the
+single split `train_boards.py` runs by default. Across five splits
+the same architecture averages **58.8% ±3.4** — the default split is
+about two standard deviations lucky, and the multi-seed figure is the
+one to trust. The confusion structure below is stable across seeds;
+the headline number is not.
+
 `winter_minimal` was never once classified as `fleurs` — zero times
 out of 46 — while fleurs and pink were confused 23 times, the
 dominant error mode.
@@ -51,15 +57,23 @@ absorbed into the pink board — is not supported: 14 errors one way,
 
 ### Why it isn't the model
 
-- **Capacity:** a width sweep from 4 to 128 hidden units is flat.
-  At 128 the model hits 100% train accuracy while test barely moves.
-- **Unlimited capacity:** kNN fits no parameters and memorizes
-  everything. It hits the same ceiling on fleurs vs pink.
+- **Capacity:** a width sweep from 4 to 128 hidden units is flat —
+  test accuracy stays between 54.2% and 58.8% across five seeds per
+  width, while train accuracy climbs from 63.0% to 91.5%. Extra
+  capacity buys memorization, not generalization.
 - **Imbalance:** boards are 228 / 233 / 233.
-- **Optimization:** train 65.7%, test 66.4% — a 0.7 point gap.
+- **Optimization:** train 65.7%, test 66.4% — a 0.7 point gap, and
+  `docs/14` shows optimizer choice moves the binary headline by at
+  most two test images.
 - **The features alone:** best d′ separating pink-ish from winter is
-  1.32; best separating fleurs from pink is 0.61. Measured on the
-  data with no model involved.
+  0.88 against 0.63 for fleurs vs pink, and 1.6× on the mean across
+  all 32 features. Measured on the data with no model involved —
+  this is the load-bearing evidence, because nothing is fitted.
+- **Unlimited capacity, with a caveat:** kNN peaks at 64.1% on
+  fleurs vs pink. But it only reaches 69.0% on pink vs winter, where
+  the network gets 82.5%, so kNN is a weaker classifier here rather
+  than a true upper bound. Consistent with the claim, not proof of
+  it. See `docs/15`.
 
 What remains is representation. Subject matter is spatial, and every
 one of the 32 features averages or bins over the whole image,
@@ -123,11 +137,18 @@ the learning rates were arbitrary, and SGD at $lr = 2.0$ reaches the
 same target in 10 epochs, faster than Adam. Comparing two methods at
 one arbitrary hyperparameter each measures the hyperparameters.
 
-Sweeping properly gives the honest result: best accuracy is similar
-across optimizers, but SGD's accuracy swings 16.1 points across
-learning rates while Adam's swings 7.5. Adam's advantage here is
-robustness to tuning, not speed — a smaller claim than the first
-version implied. Details in `docs/14`.
+Sweeping properly, on the rebuilt dataset: peak accuracy is
+indistinguishable across the three optimizers (75.7% / 72.9% / 68.6%
+for SGD / Momentum / Adam, a range of five test images out of 70),
+but SGD's accuracy swings 11.4 points across learning rates while
+Adam's swings 2.9. Adam's advantage here is robustness to tuning,
+not speed — a smaller claim than the first version implied, and the
+only one that survived the rebuild. Details in `docs/14`.
+
+Adam also makes the clearest overfitting case in the project: at
+$lr = 0.05$ it reaches 99.6% train accuracy and 68.6% test. On the
+contaminated data that behavior scored as accuracy, which is why
+Adam looked best before and no better than the others now.
 
 What made it worth checking was that the result was too flattering.
 A sixfold speedup from swapping an update rule on a two-layer

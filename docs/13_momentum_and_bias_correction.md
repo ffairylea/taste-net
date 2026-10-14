@@ -53,18 +53,20 @@ and the update overshoots the minimum and bounces around it instead
 of settling.
 
 Both failure modes are visible in this project's own learning-rate
-sweep (`compare_optimizers.py`):
+sweep (`compare_optimizers.py`, full tables in file 14):
 
-| lr | final loss | epochs to reach 0.3 | test accuracy |
+| lr | final loss | train | test |
 |---|---|---|---|
-| 0.01 | 0.4160 | never (within 500) | 78.5% |
-| 0.3 | 0.0927 | 74 | 94.6% |
-| 2.0 | 0.0170 | 10 | 92.5% |
+| 0.01 | 0.6317 | 63.8% | 65.7% |
+| 0.1 | 0.5329 | 72.3% | 72.9% |
+| 1.0 | 0.1846 | 93.3% | 64.3% |
 
-At 0.01 the steps are so small that 500 epochs aren't enough. At 2.0
-the loss drops fastest but the test accuracy is worse than at 0.3 —
-and the loss curve for that run, in
-`docs/evidence/optimizer_comparison.png`, is visibly jagged rather
+At 0.01 the steps are so small that 500 epochs barely move the loss,
+and both accuracies stay low. At 1.0 the loss drops to a third of
+its value at 0.1 and training accuracy climbs 21 points — while test
+accuracy *falls* by 8.6. The large steps are fitting the training
+set and not generalizing, and the loss curve for that run in
+`docs/evidence/optimizer_comparison.png` is visibly jagged rather
 than smooth, which is overshooting made visual.
 
 The learning rate is a **hyperparameter**: a number chosen before
@@ -78,7 +80,7 @@ guess matters much less.
 
 ## Problem 1: the gradient is a noisy estimate
 
-The gradient is computed from the 373 training images — not
+The gradient is computed from the 282 training images — not
 from some underlying truth about images in general. It's a sample
 estimate, so it wobbles.
 
