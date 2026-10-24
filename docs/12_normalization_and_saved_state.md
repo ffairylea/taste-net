@@ -1,8 +1,8 @@
-# 12 — Normalization, and the state that has to be saved with it
+# 12: Normalization, and the state that has to be saved with it
 
 File 01 mentioned that features get normalized before training. This
 file covers what that actually does, why the model can't work
-without it, and a bug it caused in this project — one that would
+without it, and a bug it caused in this project, one that would
 have failed silently rather than crashing.
 
 ## The problem: features on wildly different scales
@@ -18,7 +18,7 @@ Rough typical values from the real dataset:
 
 `brightness` is roughly fourteen times larger than
 `color_variance`. That difference is an accident of how each was
-defined — variance is an average of *squared* distances, so it's
+defined: variance is an average of *squared* distances, so it's
 naturally small, while brightness is an average of values already
 between 0 and 1.
 
@@ -26,7 +26,7 @@ This matters because of the weighted sum from file 03. The model
 computes $z = w_1x_1 + w_2x_2 + \ldots$, and gradient descent nudges
 each $w$ in proportion to the $x$ it multiplies. A feature whose
 values are tiny produces tiny gradients, so its weight moves
-slowly — not because the feature is uninformative, but purely
+slowly, not because the feature is uninformative, but purely
 because its numbers happen to be small. The model would take far
 longer to learn anything from `color_variance` than from
 `brightness`, for a reason that has nothing to do with either
@@ -40,7 +40,7 @@ Take five images with these brightness values:
 
 $$0.4,\quad 0.5,\quad 0.6,\quad 0.7,\quad 0.8$$
 
-**Mean** — add them, divide by how many:
+**Mean**: add them, divide by how many:
 
 $$\mu = \frac{0.4+0.5+0.6+0.7+0.8}{5} = \frac{3.0}{5} = 0.6$$
 
@@ -51,7 +51,7 @@ Distance of each value from the mean:
 
 $$-0.2,\quad -0.1,\quad 0,\quad 0.1,\quad 0.2$$
 
-Square each one. This is the step that matters — without squaring,
+Square each one. This is the step that matters: without squaring,
 these sum to exactly zero every time, because the negatives and
 positives cancel by construction (that's what a mean *is*). Squaring
 makes everything positive so the distances can actually accumulate:
@@ -63,7 +63,7 @@ Average them:
 $$\sigma^2 = \frac{0.10}{5} = 0.02$$
 
 That average of squared distances is the **variance**. But squaring
-also changed the units — we're now in "brightness squared," which
+also changed the units. We're now in "brightness squared," which
 isn't comparable to the original numbers. Taking the square root
 undoes that:
 
@@ -87,7 +87,7 @@ $$\frac{0.8-0.6}{0.141} = +1.42 \qquad \text{(1.42 std devs above typical)}$$
 $$\frac{0.6-0.6}{0.141} = 0 \qquad \text{(exactly typical)}$$
 $$\frac{0.4-0.6}{0.141} = -1.42 \qquad \text{(1.42 below)}$$
 
-Every feature now reads on the same scale — not "0.56 brightness"
+Every feature now reads on the same scale, not "0.56 brightness"
 but "half a standard deviation above average brightness." A
 `color_variance` of 0.04 and a `brightness` of 0.56 might both
 normalize to $+0.3$, and the model can now weigh them against each
@@ -100,7 +100,7 @@ magnitude.
 ## What that implies about saved models
 
 The weights learned in this normalized coordinate system. A weight
-attached to `brightness` doesn't mean "per unit of brightness" — it
+attached to `brightness` doesn't mean "per unit of brightness"; it
 means "per standard deviation of brightness, measured against the
 training set."
 
@@ -110,7 +110,7 @@ meaning, because there's no way to know what coordinate system they
 were expressed in.
 
 There are 32 means and 32 standard deviations. `train.py` computed
-them, used them, and then saved only the weights — throwing them
+them, used them, and then saved only the weights, throwing them
 away. That's the bug.
 
 ## Why the obvious fix produces all zeros
@@ -138,8 +138,8 @@ So the z-score is:
 
 $$\frac{0.8 - 0.8}{0} = \frac{0}{0}$$
 
-`dataset.normalize` has a guard for zero standard deviation —
-`std[std == 0] = 1` — which turns this into $0/1 = 0$.
+`dataset.normalize` has a guard for zero standard deviation
+(`std[std == 0] = 1`), which turns this into $0/1 = 0$.
 
 **Zero.** And not just for brightness. Every feature's distance from
 its own value is zero, so all 32 features become zero. The feature
@@ -155,7 +155,7 @@ Feed that all-zero vector into the forward pass:
 
 $$Z_1 = XW_1 + b_1 = 0 \cdot W_1 + b_1 = b_1$$
 
-The input vanishes entirely. $Z_1$ is just the bias — a constant
+The input vanishes entirely. $Z_1$ is just the bias, a constant
 that doesn't depend on the image at all. Everything downstream is
 therefore also constant, and the model returns the same probability
 for a sunset, a parking garage, and a pink Pinterest image. Forever.
@@ -172,7 +172,7 @@ is to reason about what the operations *mean* rather than whether
 they execute.
 
 The zero-standard-deviation guard, incidentally, exists for a
-legitimate reason — a feature that's constant across the whole
+legitimate reason: a feature that's constant across the whole
 training set has $\sigma = 0$ and would divide by zero. Setting it
 to 1 makes that feature normalize to 0 for every image, which is
 correct: a feature that never varies carries no information. The
@@ -219,7 +219,7 @@ different angle:
 The test set is normalized with the *training* mean and standard
 deviation, not its own. Computing them from the test set would let
 information about the test data influence how the test data gets
-processed — a mild form of data leakage, and the reported accuracy
+processed, a mild form of data leakage, and the reported accuracy
 would be slightly optimistic.
 
 A single new image at prediction time is just the extreme version of

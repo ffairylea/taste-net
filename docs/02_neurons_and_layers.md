@@ -1,4 +1,4 @@
-# 02 — Neurons and layers: the basic vocabulary
+# 02: Neurons and layers: the basic vocabulary
 
 ## Neuron (analogy from neuroscience :)
 
@@ -10,13 +10,13 @@ function, and produces one output number.
 
 A layer is a group of neurons sitting at the same "stage" of the
 network. Every neuron in a layer receives the exact same inputs, but
-each neuron has its own separate weights — so a layer produces
+each neuron has its own separate weights, so a layer produces
 multiple outputs at once, one per neuron, all computed in parallel.
 
 ## In taste-net, specifically
 
-- **Hidden layer** = 8 neurons (picked 8 as a reasonable middle-ground guess for ~450 images — worth testing other values later), side by side. Each one receives the
-  same 29 features, but each has its own private set of 29 weights
+- **Hidden layer** = 8 neurons (picked 8 as a reasonable middle-ground guess for ~350 images; a later sweep from 4 to 128 in file 15 found the width barely matters here), side by side. Each one receives the
+  same 32 features, but each has its own private set of 32 weights
   plus its own bias, so each computes its own separate raw score.
 - **Output layer** = 1 neuron. It receives the 8 hidden layer
   outputs, combines them into one final score, and produces the
@@ -24,9 +24,9 @@ multiple outputs at once, one per neuron, all computed in parallel.
 
 The picture:
 
-    29 features (x)
+    32 features (x)
          |
-         | (every one of these 29 numbers goes to every neuron below)
+         | (every one of these 32 numbers goes to every neuron below)
          v
     [neuron1][neuron2][neuron3]...[neuron8]   <- hidden layer
          |       |        |            |
@@ -43,10 +43,10 @@ the output layer).
 
 ## Why organize it this way?
 
-Layers process in strict sequence — every neuron in the hidden layer
+Layers process in strict sequence: every neuron in the hidden layer
 must finish before the output layer can start, since the output
 layer needs the hidden layer's results as its input. This staged
 structure is what makes the math tractable later on (clean, one
 matrix multiplication per layer), and it's exactly what backprop
-walks backward through, one layer at a time — which is where the
+walks backward through, one layer at a time, which is where the
 name "back-propagation" comes from.

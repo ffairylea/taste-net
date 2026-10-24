@@ -1,15 +1,15 @@
-# 10 — What does each file in this project actually do?
+# 10: What does each file in this project actually do?
 
 A map of every file in src/, for anyone (including future me)
 trying to understand how the pieces fit together.
 
 ## features.py
 
-Turns one image into the 29-number feature vector described in file
-01 — brightness, saturation, warmth, color histogram, etc. Each
+Turns one image into the 32-number feature vector described in file
+01: brightness, saturation, warmth, color histogram, etc. Each
 function computes one real, hand-checkable statistic from the raw
 pixel grid. This is the only file that touches actual image pixels;
-everything downstream only ever sees the 29 numbers it produces.
+everything downstream only ever sees the 32 numbers it produces.
 
 ## dataset.py
 
@@ -18,12 +18,12 @@ features.py to get its feature vector, and assembles the full X
 (features) and y (labels) arrays the model trains on. Also handles:
 
 - Normalization (z-score: subtract the mean, divide by the
-  standard deviation, per feature column) — necessary because
+  standard deviation, per feature column), necessary because
   features like brightness (0 to 1) and color_variance (a very
   different scale) would otherwise cause the model to effectively
   ignore small-scale features regardless of how important they are,
   since gradient descent responds to raw magnitude.
-- Train/test split — holds out a portion of images the model
+- Train/test split: holds out a portion of images the model
   never trains on, so accuracy can be checked on data it hasn't
   memorized. This is what produces the train vs. test accuracy gap
   I use to check for overfitting.
@@ -35,20 +35,20 @@ happen to average 0.61 (just by chance, from random sampling into a
 smaller set). If each set were normalized using its OWN separate
 mean, training data gets centered around 0.55, test data gets
 centered around a different point, 0.61. The model trained on data
-centered at 0.55 — but evaluating it on data rescaled to a different
+centered at 0.55, but evaluating it on data rescaled to a different
 reference point means testing it on data that doesn't relate to the
 training data the same way anymore, similar to training someone on
 speed limits in km/h then testing them in mph without saying so.
 
 Using training's mean/std on BOTH sets keeps everything on the exact
-same scale throughout — a normalized value means the same thing
+same scale throughout: a normalized value means the same thing
 whether it came from a training or test image.
 
 There's also a deeper reason this matters: test data exists to
 simulate "brand new images the model has never seen, evaluated
 fairly." Computing statistics FROM the test set to normalize it
 uses information about the test set's own distribution during
-preprocessing, even without touching its labels directly — a subtle
+preprocessing, even without touching its labels directly, a subtle
 form of data leakage that could make test accuracy look artificially
 better than it would on truly unseen future images, since real new
 images wouldn't come with their own conveniently pre-computed
@@ -56,7 +56,7 @@ statistics matching this specific batch.
 
 ## model.py
 
-The actual neural network — covered in full in files 03-09.
+The actual neural network, covered in full in files 03-09.
 Everything mathematical lives here: forward pass, loss, backward
 pass, weight updates.
 
@@ -67,25 +67,51 @@ it, splits it, creates a TasteNet, runs the training loop for 500
 epochs (calling train_step from model.py each time), then reports
 final accuracy and rough feature importance (which input features
 ended up with the largest average weight magnitude feeding into the
-hidden layer — a rough signal for what the model leaned on most).
+hidden layer: a rough signal for what the model leaned on most).
 
 ## dedupe.py
 
-Not part of the model at all — a data-cleaning utility. Finds exact
+Not part of the model at all: a data-cleaning utility. Finds exact
 duplicate images (by content hash, not filename) and removes them,
 since duplicates in the training data would bias the model toward
 whatever happened to be repeated.
 
 ## fetch_unsplash_no.py
 
-Also not part of the model — a data-collection utility. Pulls
+Also not part of the model: a data-collection utility. Pulls
 varied, randomized photos from Unsplash's API to build the "no"
 contrast set, since manually downloading ~150 images one at a time
 isn't practical. Tracks what's already been downloaded per category
 so it can resume rather than restart if the API rate limit is hit
 partway through.
 
-## The dependency chain, start to finish
+## Added in Phase 2 and after
+
+The sections above cover the original Phase 1 pipeline. These files
+came later:
+
+- `parse_pinterest_export.py` reads Pinterest's official data export
+  and downloads a clean dataset from it, one file per pin, named by
+  the pin's image hash. This replaced Imageye scraping (file 16).
+  `--board-id` builds one board folder; `--all-boards` samples across
+  every board for the Phase 1 "yes" set.
+- `check_near_duplicates.py` finds the same image at different
+  resolutions or compression levels using a perceptual hash. MD5
+  only catches byte-identical files, which is why `dedupe.py` missed
+  them.
+- `check_board_overlap.py` finds images that appear in more than one
+  board folder, which would give the model contradictory labels.
+- `dataset_boards.py`, `model_multiclass.py`, `train_boards.py` are
+  Stage 2: the same pipeline as Phase 1, with one folder per board,
+  one-hot labels, and softmax instead of sigmoid (file 11).
+- `optimizers.py` implements SGD, momentum and Adam from scratch
+  (file 13). `compare_optimizers.py` sweeps learning rates for all
+  three (file 14).
+- `probe_representation.py` runs the kNN, width sweep and per-feature
+  d′ checks behind the fleurs experiment (file 15).
+- `predict.py` runs both stages on a single new image.
+
+## The Phase 1 dependency chain, start to finish
 
     fetch_unsplash_no.py / manual Pinterest download
               |
@@ -96,7 +122,7 @@ partway through.
          dedupe.py  (remove exact duplicates)
               |
               v
-        features.py  (image -> 29 numbers)
+        features.py  (image -> 32 numbers)
               |
               v
         dataset.py  (assemble X, y; normalize; split)
@@ -111,7 +137,7 @@ partway through.
 
 
 
-## features.py — implementation details
+## features.py: implementation details
 
 ### load_image
 
@@ -121,7 +147,7 @@ partway through.
         return np.array(img) / 255.0
 
 `.convert("RGB")` forces every image into the same 3-channel
-(red/green/blue) format — some images might be grayscale or have a
+(red/green/blue) format, since some images might be grayscale or have a
 4th "transparency" channel (RGBA), and without this conversion,
 feature vectors would come out inconsistent in shape, breaking
 everything downstream.
@@ -132,8 +158,8 @@ dimensions would otherwise produce different-length pixel arrays,
 and the model needs every feature vector to be the exact same
 length to compare/train on them.
 
-`/ 255.0` — raw pixel values are integers 0-255 (standard for
-images). Dividing by 255 rescales everything into the 0-to-1 range —
+`/ 255.0`: raw pixel values are integers 0-255 (standard for
+images). Dividing by 255 rescales everything into the 0-to-1 range,
 a normalization step, similar in spirit to why dataset.py normalizes
 features later.
 
@@ -146,20 +172,20 @@ features later.
         sat = np.where(mx > 0, (mx - mn) / (mx + 1e-8), 0)
         return float(sat.mean())
 
-`img_array[..., 0]` — the `...` means "every row, every column," and
+`img_array[..., 0]`: the `...` means "every row, every column," and
 `0` picks out just the red channel (index 0 of the 3 RGB channels),
 so `r` becomes a whole 64x64 grid of just red values.
 
 `np.where(mx > 0, (mx-mn)/(mx+1e-8), 0)` is a conditional, computed
 for every pixel at once: IF the max channel value is greater than 0,
 compute the saturation formula; OTHERWISE (a pure black pixel, all
-channels 0), just use 0 — avoiding a divide-by-zero error.
+channels 0), just use 0, avoiding a divide-by-zero error.
 
 `.mean()` computes saturation for every individual pixel, then
 averages across all 4096 pixels (64x64) into one single number
 representing the whole image's overall saturation.
 
-## dataset.py — implementation details
+## dataset.py: implementation details
 
 ### normalize
 
@@ -171,14 +197,14 @@ representing the whole image's overall saturation.
             std[std == 0] = 1
         return (X - mean) / std, mean, std
 
-`axis=0` — X is a grid (many images x 29 features). `axis=0` means
+`axis=0`: X is a grid (many images x 32 features). `axis=0` means
 "compute the mean/std down each column separately" (one mean value
 per feature, computed across all images), not one single overall
-average mixing everything together. Each of the 29 features gets
+average mixing everything together. Each of the 32 features gets
 its own personalized rescaling, since features like brightness and
 color_variance live on very different natural scales.
 
-`std[std==0]=1` — if some feature happened to be exactly identical
+`std[std==0]=1`: if some feature happened to be exactly identical
 across every image (zero variation, std=0), dividing by that zero
 would crash. Setting it to 1 instead means "don't rescale this
 feature at all" rather than erroring out.
@@ -193,12 +219,12 @@ feature at all" rather than erroring out.
 
 `rng.permutation(len(X))` generates a random shuffling of all index
 numbers (0, 1, 2, ... up to however many images there are), so
-images get randomly assigned to train or test — not just "first 80%
+images get randomly assigned to train or test, not just "first 80%
 vs last 20%," which could accidentally group similar images together
 if they were added to the folder in some non-random order.
 
 Why hold out test data at all? This is the mechanism behind the
-train vs. test accuracy comparison in the actual training results —
+train vs. test accuracy comparison in the actual training results:
 the model never sees the test images during training, so testing on
 them checks whether it learned a real, generalizable pattern versus
 just memorizing the specific training images.

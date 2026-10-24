@@ -19,7 +19,7 @@ makes the categorical cross-entropy sum "pick out" exactly the
 predicted probability of the correct class.
 
 Normalization and train/test splitting are reused straight from
-dataset.py — that logic doesn't care how many classes exist.
+dataset.py - that logic doesn't care how many classes exist.
 """
 
 import os
@@ -42,11 +42,11 @@ def discover_boards(boards_dir="data/boards"):
 
 def build_board_dataset(boards_dir="data/boards"):
     """Returns:
-        X      (n_samples, n_features)  — feature vectors
-        Y      (n_samples, n_classes)   — one-hot labels
-        labels (n_samples,)             — class indices (for
+        X      (n_samples, n_features)  - feature vectors
+        Y      (n_samples, n_classes)   - one-hot labels
+        labels (n_samples,)             - class indices (for
                                           confusion matrix / splits)
-        boards list of board names       — index i <-> boards[i]
+        boards list of board names       - index i <-> boards[i]
         paths  list of file paths
     """
     boards = discover_boards(boards_dir)

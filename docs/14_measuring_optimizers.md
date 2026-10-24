@@ -1,7 +1,7 @@
-# 14 — Measuring the optimizers, and getting it wrong first
+# 14: Measuring the optimizers, and getting it wrong first
 
 File 13 derived momentum and Adam. This file is about testing
-whether they actually help on this dataset — and about a mistake in
+whether they actually help on this dataset, and about a mistake in
 the first attempt at that test, which is the more useful half.
 
 Every table in this file was re-measured after the dataset rebuild
@@ -24,7 +24,7 @@ shape of the error):
 | Adam, $lr = 0.01$ | 38 | 95.7% |
 
 Adam reaching the target in 38 epochs against SGD's 220 looks like
-a decisive result — a roughly sixfold speedup, plus six points of
+a decisive result: a roughly sixfold speedup, plus six points of
 accuracy.
 
 It was not a decisive result. It was not a result at all.
@@ -108,13 +108,13 @@ quietly becoming uninformative is itself worth noticing.
 **The accuracy column cannot be read as a ranking.** The 7.1-point
 range between best-SGD and best-Adam is five test images out of 70.
 Nothing here supports "SGD beats Adam on this problem" any more than
-the first version supported the reverse — the correct statement is
+the first version supported the reverse. The correct statement is
 that peak accuracy is indistinguishable across the three at this
 sample size.
 
 What is large enough to survive is the **spread**. SGD's result
 swings 11.4 points depending on a number that has to be guessed in
-advance — eight test images — while Adam's swings 2.9, which is two.
+advance (eight test images), while Adam's swings 2.9, which is two.
 Every Adam setting from 0.001 to 0.05 lands in the 65.7–68.6% band.
 
 That matches the mechanism derived in file 13. Dividing each step by
@@ -123,8 +123,8 @@ to its own gradient magnitude, which is precisely a reduction in
 sensitivity to the global $lr$. The measurement confirms the
 mechanism rather than a speed claim.
 
-The honest summary is therefore **"needs less tuning"** rather than
-**"converges faster"** — a smaller claim, and the one the evidence
+The summary is therefore **"needs less tuning"** rather than
+**"converges faster"**: a smaller claim, and the one the evidence
 supports. It is also the one claim in this file that survived the
 dataset rebuild unchanged, which is some evidence it was the right
 claim to make.
@@ -133,7 +133,7 @@ claim to make.
 
 The sharpest number in the three tables is not an accuracy. Adam at
 $lr = 0.05$ reaches a training loss of 0.0163 and a train accuracy
-of **99.6%**, against a test accuracy of 68.6% — a 31-point gap. At
+of **99.6%**, against a test accuracy of 68.6%, a 31-point gap. At
 $lr = 0.01$ it is 98.9% against 65.7%. Adam fits this training set
 essentially perfectly and gains nothing for it.
 
@@ -141,34 +141,28 @@ On the contaminated dataset that same behavior reported as
 *accuracy*, because near-duplicates of the training images were
 sitting in the test set, so memorizing them scored. Adam was the
 best optimizer in the original benchmark and is the worst-looking
-one here, and nothing about Adam changed — only whether memorization
+one here, and nothing about Adam changed, only whether memorization
 was being rewarded.
-
-<!-- TODO (Lea): this subsection is the one genuinely new finding in
-     the rewrite and it is currently in my words, not yours. It is
-     also good interview material, so it is worth writing yourself:
-     the claim is just "an optimizer that fits the training set
-     faster looks better the more contaminated your split is." -->
 
 A note on `docs/evidence/optimizer_comparison.png`, because an
 earlier version of this file described it wrongly. The plot plots
 *training loss*, and the spread result above is about *test
 accuracy*, which does not appear on it. Read literally, the figure
-shows Adam's curves fanning out more than SGD's, not less — because
+shows Adam's curves fanning out more than SGD's, not less, because
 Adam reaches a far wider range of final training losses.
 
 What the figure does show, clearly, is two things worth having.
 SGD at $lr = 1.0$ and $lr = 2.0$ is violently jagged where every
 other curve is smooth: overshooting made visual. And Adam drives
 training loss roughly an order of magnitude below anything SGD
-reaches, which — given that it bought no test accuracy — is the
+reaches, which, given that it bought no test accuracy, is the
 overfitting result in picture form.
 
 ## Two things that fell out of the sweep
 
 ### Momentum does essentially nothing here
 
-Momentum tracks plain SGD closely at every shared learning rate —
+Momentum tracks plain SGD closely at every shared learning rate,
 within one or two test images at 0.01, 0.05, 0.1 and 0.3, and with
 near-identical loss curves throughout.
 
@@ -190,7 +184,7 @@ explanation for why.
 ### Overfitting is visible in the numbers
 
 Sorting every run by final training loss, regardless of optimizer,
-produces a clean monotone pattern — and the thing that grows is the
+produces a clean monotone pattern, and the thing that grows is the
 train/test gap, not the test accuracy:
 
 | run | final loss | train | test | gap |
@@ -201,7 +195,7 @@ train/test gap, not the test accuracy:
 | Adam $lr = 0.01$ | 0.0547 | 98.9% | 65.7% | +33.2 |
 | Adam $lr = 0.05$ | 0.0163 | 99.6% | 68.6% | +31.0 |
 
-Driving the training loss from 0.53 to 0.016 — a factor of 33 — buys
+Driving the training loss from 0.53 to 0.016 (a factor of 33) buys
 27 points of training accuracy and **nothing on the test set.** Test
 accuracy is flat to slightly worse across that entire range.
 
@@ -220,7 +214,7 @@ contaminated dataset, and on clean data the direction reverses: Adam
 at $lr = 0.01$ scores 65.7% against `train.py`'s SGD $lr = 0.1$ at
 72.9%.
 
-The honest version is that **optimizer choice does not move this
+What actually holds is that **optimizer choice does not move this
 project's headline number at all.** The default configuration gets
 72.9%; the best result from any optimizer at any swept learning rate
 is 75.7%, which is two test images away. Whatever is limiting Phase 1

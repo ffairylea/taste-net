@@ -18,7 +18,7 @@ Usage, from inside src/:
 This is where the design decision from PHASE2_MULTIBOARD_PLAN.md
 becomes visible rather than theoretical: an image rejected at Stage 1
 never reaches Stage 2 at all. The board model is never asked to
-assign a board to something that isn't my taste in the first place —
+assign a board to something that isn't my taste in the first place -
 it would happily do so (softmax always sums to 1, so it ALWAYS
 returns a confident-looking distribution, even on garbage input),
 which is exactly why the gate exists.
@@ -51,7 +51,7 @@ def apply_normalization(x, mean, std):
     that same system to be interpretable.
 
     Normalizing a single image against its own mean/std would give
-    all zeros — every image identical, model output constant, no
+    all zeros - every image identical, model output constant, no
     error raised. Silent failure. Hence the hard check below."""
     std = np.where(std == 0, 1, std)  # same guard as dataset.normalize
     return (x - mean) / std
@@ -101,7 +101,7 @@ def predict_one(path, stage1, stage2, threshold=0.5):
     p_yes = float(net1.predict(x1)[0])
     result = {"path": path, "p_yes": p_yes, "kept": p_yes > threshold}
 
-    # The gate. Rejected images stop here — Stage 2 is never called.
+    # The gate. Rejected images stop here - Stage 2 is never called.
     if not result["kept"] or stage2 is None:
         return result
 
@@ -137,10 +137,10 @@ def print_result(r, n_boards=None):
         print(f"           {board:<18s} {p:6.1%} {bar}")
 
     # Softmax always produces a full distribution, so a near-uniform
-    # one is the model's way of saying "no idea" — worth surfacing
+    # one is the model's way of saying "no idea" - worth surfacing
     # rather than hiding behind the argmax.
     if n_boards and r["board_confidence"] < 1.5 / n_boards:
-        print("           (barely above chance — the boards look "
+        print("           (barely above chance - the boards look "
               "similar in feature space for this image)")
 
 
@@ -155,14 +155,14 @@ def main():
 
     if not os.path.exists(STAGE1_WEIGHTS):
         raise SystemExit(
-            f"No {STAGE1_WEIGHTS} — train Stage 1 first: python3 train.py"
+            f"No {STAGE1_WEIGHTS} - train Stage 1 first: python3 train.py"
         )
 
     stage1 = load_stage1()
     stage2 = load_stage2()
 
     if stage2 is None:
-        print("Stage 2 not trained yet — running Stage 1 only.\n"
+        print("Stage 2 not trained yet - running Stage 1 only.\n"
               "(Collect board images into data/boards/<name>/ and run "
               "train_boards.py to enable board prediction.)")
         n_boards = None

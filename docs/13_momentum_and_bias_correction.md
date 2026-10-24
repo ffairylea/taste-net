@@ -1,4 +1,4 @@
-# 13 — Better update rules: momentum and bias correction
+# 13: Better update rules: momentum and bias correction
 
 Files 07 and 08 ended with the simplest possible way to use a
 gradient:
@@ -63,7 +63,7 @@ sweep (`compare_optimizers.py`, full tables in file 14):
 
 At 0.01 the steps are so small that 500 epochs barely move the loss,
 and both accuracies stay low. At 1.0 the loss drops to a third of
-its value at 0.1 and training accuracy climbs 21 points — while test
+its value at 0.1 and training accuracy climbs 21 points, while test
 accuracy *falls* by 8.6. The large steps are fitting the training
 set and not generalizing, and the loss curve for that run in
 `docs/evidence/optimizer_comparison.png` is visibly jagged rather
@@ -74,13 +74,13 @@ training, as opposed to the weights, which are learned during it.
 There is no way to compute the correct value in advance, which is
 why finding it means sweeping a range and looking at what happens.
 
-Adam, later in this file, is largely an answer to that problem — it
+Adam, later in this file, is largely an answer to that problem: it
 gives each weight its own effective step size, so the single global
 guess matters much less.
 
 ## Problem 1: the gradient is a noisy estimate
 
-The gradient is computed from the 282 training images — not
+The gradient is computed from the 282 training images, not
 from some underlying truth about images in general. It's a sample
 estimate, so it wobbles.
 
@@ -100,7 +100,7 @@ Keep a running average instead of using each measurement raw:
 $$m \leftarrow 0.9m + 0.1g$$
 
 Read it as: keep 90% of what you already believed, mix in 10% of the
-new measurement. This is an **exponential moving average** —
+new measurement. This is an **exponential moving average**,
 "exponential" because the influence of any single past gradient
 decays by a factor of 0.9 every step, so old measurements fade
 smoothly rather than being dropped abruptly.
@@ -121,13 +121,13 @@ reverse instantly when the slope wobbles. It carries velocity from
 where it has already been.
 
 With $\beta = 0.9$, the average is dominated by roughly the last ten
-gradients — $0.9^{10} \approx 0.35$, so a measurement's influence
+gradients: $0.9^{10} \approx 0.35$, so a measurement's influence
 decays to about a third over that span.
 
 ## Problem 2: the average starts out too small
 
 Look again at those numbers. After four steps the average reads
-0.17, but the true gradient is 0.5. That isn't the noise — it's a
+0.17, but the true gradient is 0.5. That isn't the noise. It's a
 systematic undercount, in the same direction every time, and it has
 an obvious cause: $m$ was initialized to **0**.
 
@@ -152,13 +152,13 @@ the correct value.
 
 ### Why the magnitude matters
 
-The step actually taken is $lr \cdot m$ — the learning rate times
+The step actually taken is $lr \cdot m$, the learning rate times
 the averaged gradient. So an $m$ of 0.7 when the truth is 7 produces
 a step ten times smaller than intended. Training crawls during the
 early epochs for a reason that has nothing to do with the loss
 surface and everything to do with an initialization artifact.
 
-This is not fatal — the average does converge eventually — but the
+This is not fatal (the average does converge eventually), but the
 first several dozen updates are wasted, and those are precisely the
 updates where the weights are furthest from good values and the
 largest corrections are most useful.
@@ -177,7 +177,7 @@ Two things about those fractions matter.
 
 **They don't depend on the gradient.** Running the same recursion
 with a constant gradient of 0.03 gives $m_1 = 0.003$, and
-$0.003 / 0.03 = 0.1$ — the same 10%. The fraction is a property of
+$0.003 / 0.03 = 0.1$, the same 10%. The fraction is a property of
 the recursion and the step number, not of the data.
 
 **They are exactly $1 - 0.9^t$:**
@@ -223,7 +223,7 @@ Reordered smallest power first:
 $$m_3 = 0.1g + 0.9(0.1g) + 0.81(0.1g)$$
 
 Three terms, each being $0.1g$ multiplied by a successive power of
-0.9 — namely $0.9^0$, $0.9^1$, $0.9^2$. Factoring $0.1g$ out:
+0.9, namely $0.9^0$, $0.9^1$, $0.9^2$. Factoring $0.1g$ out:
 
 $$m_3 = 0.1g\left(1 + 0.9 + 0.81\right)$$
 
@@ -244,7 +244,7 @@ Substituting back:
 
 $$m_t = 0.1g \cdot \frac{1 - 0.9^t}{0.1} = (1 - 0.9^t)\,g$$
 
-The $0.1$ cancels — and that cancellation isn't luck. The $0.1$ in
+The $0.1$ cancels, and that cancellation isn't luck. The $0.1$ in
 the update rule *is* $1 - \beta$, and $1 - \beta$ is exactly what the
 geometric sum divides by. The two are the same quantity, so they
 always cancel, for any $\beta$.
@@ -277,14 +277,14 @@ algebra:
 
 $$\frac{m_t}{1-\beta^t} = \frac{(1-\beta^t)\,g}{1-\beta^t} = g$$
 
-Whatever the gradient is — 7, or 0.03, or different for every one of
-the hundreds of weights in the network — the correction returns it
+Whatever the gradient is (7, or 0.03, or different for every one of
+the hundreds of weights in the network), the correction returns it
 at full size. There is no target value being aimed at; the operation
 simply undoes a known shrinkage.
 
 And it disables itself automatically. As $t$ grows, $\beta^t \to 0$,
 so the divisor approaches 1 and the correction stops changing
-anything — correctly, since the startup bias has washed out by then.
+anything, correctly, since the startup bias has washed out by then.
 With $\beta = 0.9$ it is essentially gone within a few dozen steps.
 
 This is the part worth appreciating: it isn't a tuned fudge factor.
@@ -311,9 +311,9 @@ after 500 epochs of training, across the 32 input features:
 
 Only 3.3x, and weight magnitude is essentially *uncorrelated* with
 gradient magnitude. An earlier draft of this file claimed that
-heavily-weighted features — the blue-channel histogram bins the
-model leans on, per the feature importance output in the README —
-produce correspondingly large gradients. That claim was false, and
+heavily-weighted features (the blue-channel histogram bins the
+model leaned on, per the original README's feature importance
+output) produce correspondingly large gradients. That claim was false, and
 the reason it has to be false follows from file 12: every input
 column is z-scored to unit variance before training, and since
 $dW_1 = X^\top dZ_1 / n$, the input columns entering that product
@@ -321,9 +321,9 @@ all have comparable scale. Normalization has already removed most
 of the disparity Adam's per-weight step size exists to handle.
 
 Two things follow. First, large weight does not imply large
-gradient — at convergence it often implies the opposite, since a
+gradient. At convergence it often implies the opposite, since a
 weight that has stopped moving has a small gradient by definition.
-Second, the honest motivation for the second moment in *this*
+Second, the real motivation for the second moment in *this*
 project is not input feature scale. It is that gradient scales still
 differ **across layers** ($W_1$ versus $W_2$ receive gradients
 through different numbers of chain-rule factors) and across training
@@ -347,7 +347,7 @@ Consider a weight whose gradients alternate:
 $$+3,\quad -3,\quad +3,\quad -3$$
 
 These are large gradients. But averaged, they come to approximately
-zero — the positives and negatives destroy each other. An optimizer
+zero: the positives and negatives destroy each other. An optimizer
 reading $m$ alone would conclude this weight has tiny gradients,
 which is exactly wrong.
 
@@ -367,8 +367,8 @@ problem, identical fix.
 
 $$v \leftarrow \beta_2 v + (1-\beta_2)g^2$$
 
-Structurally identical to the momentum update — an exponential
-moving average — but fed $g^2$ instead of $g$, with its own decay
+Structurally identical to the momentum update (an exponential
+moving average), but fed $g^2$ instead of $g$, with its own decay
 constant $\beta_2 = 0.999$.
 
 The two are named by analogy with statistics: $m$ estimates the
@@ -381,14 +381,14 @@ $$w \leftarrow w - lr \cdot \frac{\hat m}{\sqrt{\hat v} + \varepsilon}$$
 
 Symbol by symbol:
 
-- $w$ — a single weight; every weight is updated independently
-- $lr$ — the global learning rate, as before
-- $\hat m$ — the bias-corrected average gradient: *which direction*
-- $\hat v$ — the bias-corrected average squared gradient: *typical
+- $w$: a single weight; every weight is updated independently
+- $lr$: the global learning rate, as before
+- $\hat m$: the bias-corrected average gradient: *which direction*
+- $\hat v$: the bias-corrected average squared gradient: *typical
   size*
-- $\sqrt{\phantom{v}}$ — converts $\hat v$ back from squared units
+- $\sqrt{\phantom{v}}$: converts $\hat v$ back from squared units
   into gradient units, so the division cancels properly
-- $\varepsilon$ — $10^{-8}$, purely to prevent division by zero
+- $\varepsilon$: $10^{-8}$, purely to prevent division by zero
 
 Compare against the original rule:
 
@@ -416,7 +416,7 @@ Each weight's step has been normalized by its own characteristic
 gradient size.
 
 This is why $lr$ matters much less under Adam than under plain
-gradient descent — and it is the mechanism behind the reduced
+gradient descent, and it is the mechanism behind the reduced
 learning-rate sensitivity measured in file 14.
 
 ### Why $\beta_2 = 0.999$ rather than $0.9$
@@ -427,18 +427,18 @@ $\beta_2 = 0.999$ over roughly the last 1000.
 **Where "roughly 10" and "roughly 1000" come from.** The weight the
 EMA assigns to the gradient from $k$ steps ago is
 $(1-\beta)\beta^k$, so the total weight across all past steps is a
-geometric series summing to 1 — the same series used for bias
+geometric series summing to 1, the same series used for bias
 correction above. The average *age* of the contributions is:
 
 $$\sum_{k=0}^{\infty} k\,(1-\beta)\beta^k = \frac{\beta}{1-\beta}$$
 
 For $\beta = 0.9$ that gives $0.9/0.1 = 9$ steps; for
 $\beta = 0.999$, $0.999/0.001 = 999$. Hence the usual shorthand of
-$1/(1-\beta)$ — 10 and 1000 respectively. The figures are not
+$1/(1-\beta)$: 10 and 1000 respectively. The figures are not
 arbitrary conventions; they are the mean lag of the average being
 computed.
 
-The asymmetry is deliberate. Direction should adapt quickly — when
+The asymmetry is deliberate. Direction should adapt quickly: when
 the descent direction genuinely changes, the optimizer needs to
 follow it. Magnitude should adapt slowly, because $\sqrt{\hat v}$
 divides the step, so if it jittered from step to step, the effective
@@ -466,7 +466,7 @@ for $m$ is load-bearing for $v$.
 
 ### $\varepsilon$
 
-$\sqrt{\hat v}$ can be exactly zero — a ReLU whose gate stays closed
+$\sqrt{\hat v}$ can be exactly zero. A ReLU whose gate stays closed
 produces a gradient of zero on every step it stays closed, so its
 squared average stays at zero. Weights in that state appeared in the
 gradient check output as entries reading exactly `0.00000000` from

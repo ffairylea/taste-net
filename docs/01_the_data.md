@@ -1,8 +1,8 @@
-# 01 — What is the input, actually?
+# 01: What is the input, actually?
 
 An image starts as a giant grid of pixel numbers; way too many
-(12,000+ for a 64x64 image) to learn from directly with only ~450
-images. So `features.py` compresses each image down into just 29
+(12,000+ for a 64x64 image) to learn from directly with only ~350
+images. So `features.py` compresses each image down into just 32
 numbers instead: brightness, saturation, warmth, color histogram
 bins, and a few others.
 
@@ -20,7 +20,7 @@ computed by hand. Four pixels, RGB values scaled to [0, 1]:
     pixel (1,0) = (0.5, 0.5, 0.5)   mid grey
     pixel (1,1) = (1.0, 1.0, 0.0)   yellow
 
-### Average color — 3 numbers
+### Average color: 3 numbers
 
 Mean of each channel across all pixels.
 
@@ -28,7 +28,7 @@ Mean of each channel across all pixels.
     avg_g = (0.0 + 0.0 + 0.5 + 1.0) / 4 = 0.375
     avg_b = (0.0 + 1.0 + 0.5 + 0.0) / 4 = 0.375
 
-### Brightness — 1 number
+### Brightness: 1 number
 
 Not a plain average of the three channels. The coefficients are the
 standard luminance weights:
@@ -42,7 +42,7 @@ human vision is far more sensitive to green light. A pure green
 patch genuinely looks brighter than a pure blue one of the same
 numeric intensity, and an unweighted mean would call them equal.
 
-### Saturation — 1 number
+### Saturation: 1 number
 
 Per pixel, how far it is from grey, then averaged:
 
@@ -55,11 +55,11 @@ Per pixel, how far it is from grey, then averaged:
 
     saturation = (1.0 + 1.0 + 0.0 + 1.0) / 4 = 0.75
 
-Grey is the only unsaturated pixel — its channels are all equal, so
+Grey is the only unsaturated pixel: its channels are all equal, so
 the numerator is zero. That is what "distance from grey" means
 arithmetically.
 
-### Color variance — 1 number
+### Color variance: 1 number
 
 Variance over every channel of every pixel at once (12 values here),
 computed as the mean squared distance from their overall mean:
@@ -68,7 +68,7 @@ computed as the mean squared distance from their overall mean:
 
 High means busy and varied; low means flat and minimal.
 
-### Contrast — 1 number
+### Contrast: 1 number
 
 Convert each pixel to greyscale using the same luminance weights,
 then take the standard deviation across pixels:
@@ -85,16 +85,16 @@ the *lightness* swings, ignoring hue entirely. An image of red and
 green at equal brightness has high color variance and near-zero
 contrast.
 
-### Warmth — 1 number
+### Warmth: 1 number
 
     warmth = avg_r − avg_b = 0.625 − 0.375 = 0.25
 
 Positive means red-dominant, negative blue-dominant. The crudest
-feature in the set, and empirically one of the most useful — it has
+feature in the set, and empirically one of the most useful. It has
 the highest d′ of any feature separating the pink-ish boards from
 winter_minimal.
 
-### Color histogram — 24 numbers
+### Color histogram: 24 numbers
 
 For each channel, split [0, 1] into 8 equal bins and count how many
 pixels fall in each, then divide by the total so the counts become
@@ -121,18 +121,18 @@ the same proportions, but very different raw counts.
 They all reduce the image by averaging or counting over all pixels
 at once. Position never enters any formula. Two images with
 identical color distributions and completely different spatial
-arrangements produce identical feature vectors — which is exactly
+arrangements produce identical feature vectors, which is exactly
 the limitation the fleurs experiment in file 15 was designed to
 test.
 
 
 ## The feature vector
 
-This list of 29 numbers is called a **feature vector**. Think of it
-as one point in a 29-dimensional space — the same idea as a point
-(x, y) on a normal 2D graph, just with 29 coordinates instead of 2.
-An image isn't "a picture" to the model anymore at this stage — it's
-just a location in this 29-dimensional space.
+This list of 32 numbers is called a **feature vector**. Think of it
+as one point in a 32-dimensional space, the same idea as a point
+(x, y) on a normal 2D graph, just with 32 coordinates instead of 2.
+An image isn't "a picture" to the model anymore at this stage. It's
+just a location in this 32-dimensional space.
 
 ## Why this matters
 

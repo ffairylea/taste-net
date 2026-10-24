@@ -11,7 +11,7 @@ The reason: if the same pin ends up in data/boards/pink/ and also in
 data/boards/winter_minimal/, the training data now contains the same
 feature vector with two different labels. The model is being told
 that one image belongs to two mutually exclusive classes. Softmax
-cannot represent that — the outputs must sum to 1 — so the best it
+cannot represent that - the outputs must sum to 1 - so the best it
 can do is split its probability between them, which shows up as
 apparent confusion between those two boards in the confusion matrix.
 
@@ -39,7 +39,7 @@ VALID_EXT = (".jpg", ".jpeg", ".png", ".webp")
 
 def file_hash(path):
     """MD5 of the file's bytes. Catches duplicates regardless of
-    filename — but only byte-identical ones. The same pin downloaded
+    filename - but only byte-identical ones. The same pin downloaded
     at two different resolutions has different bytes and will NOT be
     caught here. See the note at the end."""
     with open(path, "rb") as f:
@@ -55,7 +55,7 @@ def main():
         delete_from = sys.argv[i + 1]
 
     if not os.path.isdir(BOARDS_DIR):
-        raise SystemExit(f"No {BOARDS_DIR}/ — nothing to check yet.")
+        raise SystemExit(f"No {BOARDS_DIR}/ - nothing to check yet.")
 
     boards = sorted(
         d for d in os.listdir(BOARDS_DIR)
@@ -63,7 +63,7 @@ def main():
     )
     if len(boards) < 2:
         raise SystemExit(
-            f"Only {len(boards)} board folder(s) — overlap needs at least 2."
+            f"Only {len(boards)} board folder(s) - overlap needs at least 2."
         )
 
     # hash -> list of (board, filename)
@@ -104,7 +104,7 @@ def main():
     if delete_from is None:
         print("\nReporting only. To remove them from one board, rerun with:")
         print("    python3 check_board_overlap.py --delete-from <board_name>")
-        print("\nDecide by hand which board each image genuinely belongs to —")
+        print("\nDecide by hand which board each image genuinely belongs to -")
         print("an image saved to two boards may legitimately fit both, which")
         print("is itself worth knowing before treating boards as exclusive.")
         _resolution_note()

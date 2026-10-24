@@ -1,4 +1,4 @@
-No ../data/boards/ yet — running sanity checks on the code itself instead.
+No ../data/boards/ yet - running sanity checks on the code itself instead.
 
 ============================================================
 1. Numerical gradient check (is dZ2 = A2 - Y actually
@@ -15,7 +15,7 @@ No ../data/boards/ yet — running sanity checks on the code itself instead.
   W2[4,2]  analytic +0.06560041  numerical +0.06560041  diff 4.46e-12
   W2[2,2]  analytic +0.00000000  numerical +0.00000000  diff 0.00e+00
 
-Worst disagreement: 7.19e-12 (PASS — should be < 1e-6)
+Worst disagreement: 7.19e-12 (PASS - should be < 1e-6)
 
 ============================================================
 2. Synthetic training check (can it learn easy clusters?)
@@ -27,6 +27,6 @@ Worst disagreement: 7.19e-12 (PASS — should be < 1e-6)
   epoch 200  loss 0.0022
   epoch 250  loss 0.0017
 
-Synthetic accuracy: 100.00% (PASS — separated clusters should be nearly perfectly learnable)
+Synthetic accuracy: 100.00% (PASS - separated clusters should be nearly perfectly learnable)
 
-Both checks PASS — the Stage 2 code is verified correct. Collect board images into data/boards/<board_name>/ and rerun.
+Both checks PASS - the Stage 2 code is verified correct. Collect board images into data/boards/<board_name>/ and rerun.

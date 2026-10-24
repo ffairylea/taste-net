@@ -7,7 +7,7 @@ a clean image dataset from it.
 WHY THIS EXISTS
 
 The Imageye browser-extension method produced 68% near-duplicates
-(see docs and check_near_duplicates.py). Pinterest virtualises its
+(see docs and check_near_duplicates.py). Pinterest virtualizes its
 feed, so repeatedly scrolling and re-scraping captures the same pin
 many times at whatever resolution happened to be rendered. Those
 copies are not byte-identical, so MD5 deduplication misses them
@@ -87,7 +87,7 @@ def parse_boards(export_dir):
     no shared key to join the two files on.
 
     This returns names in file order only. Matching names to ids has
-    to be done by inspection — see the sample pin links printed by
+    to be done by inspection - see the sample pin links printed by
     main(), which open the pin on Pinterest where its board is
     visible."""
     raw = read_all(os.path.join(export_dir, "boards"))
@@ -114,7 +114,7 @@ def parse_pins(export_dir):
 
     So the file is split on those anchors, and each chunk parsed for
     its fields. The pin URL is kept because it is the only practical
-    way to find out which board an id refers to — the export never
+    way to find out which board an id refers to - the export never
     states it."""
     raw = read_all(os.path.join(export_dir, "pins"))
 
@@ -228,7 +228,7 @@ Nothing downloaded. To fetch one board's images:
         --board-id <ID> --out ../data/boards/<name> --limit 233
 
 --limit caps how many are fetched, sampled at random with a fixed
-seed. Use the same value for every board to keep classes balanced —
+seed. Use the same value for every board to keep classes balanced -
 balanced classes make the confusion matrix interpretable and set the
 chance baseline to exactly 1/n_boards.
 
@@ -265,7 +265,7 @@ hash, so the result contains no duplicates by construction.""")
 
     # --limit takes a random sample rather than the first N.
     # Pins appear in save order, so first-N would bias toward
-    # whichever period the board was most active — a random sample
+    # whichever period the board was most active - a random sample
     # is representative of the board as a whole. Seeded so the same
     # subset is reproducible across runs and across boards.
     if "--limit" in sys.argv:
