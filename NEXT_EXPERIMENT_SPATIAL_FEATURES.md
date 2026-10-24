@@ -1,10 +1,8 @@
 # Next experiment: spatial features
 
-> **Status.** Features implemented and checked on synthetic images;
-> not yet run on the real boards, and not yet pre-registered. The
-> draft predictions below get finalized and committed before
-> `measure_spatial_dprime.py` touches real data, the same way
-> `docs/15` was.
+> **Status.** Plan, not yet pre-registered. Before any training run,
+> the final feature list and the core claim below get fixed and
+> committed, the same way `docs/15` was.
 
 ## The question
 
@@ -78,58 +76,6 @@ building this.
 
 Orientation entropy and its d′ on fleurs vs pink. About 30 lines of
 NumPy, one number, and it says whether the idea is worth the rest.
-
-## What is implemented
-
-- `src/features_spatial.py`: the 13 features above, NumPy and
-  Pillow only. Thresholds (12 orientation bins, edges = strongest
-  15% of gradients, 128×128 greyscale) are fixed in the code now, so
-  they can't drift toward whatever makes fleurs vs pink look good.
-- `src/check_spatial_features.py`: runs the features on three
-  synthetic images built to have known answers (a room of
-  rectangles, a centered eight-petal flower on a blurred background,
-  a recursive branching tree):
-
-      feature                 room   flower   branching
-      orientation_entropy    0.457    0.996       0.832
-      fractal_dimension      1.551    1.645       1.732
-      center_sharpness       1.065    1.901       0.172
-      mirror_symmetry        0.263    0.996       0.978
-
-  All four directional checks pass. The first run failed one: in an
-  image with large flat areas, the 85th percentile of gradient
-  magnitude is zero, so "at least the 85th percentile" marked every
-  pixel as an edge. Fixed by also requiring a nonzero gradient.
-- `src/measure_spatial_dprime.py`: step 1 of the design. d′ per
-  feature on fleurs vs pink and pink-ish vs winter, next to the
-  color features. Runs on the local board images; trains nothing.
-
-Two things the synthetic run already says:
-
-- **Box counting barely separates anything at this size.** The
-  straight-line room scores 1.55, not 1, because a 128-pixel image
-  only allows box sizes from 2 to 32 and Sobel edges are a few
-  pixels thick. The flower's petal outline is a smooth curve, which
-  has dimension 1 just like a straight line. Fractal dimension
-  measures branching and texture, not curvature, so on close-up
-  flowers it is the feature most likely to fail.
-- **Orientation entropy is the strongest candidate.** 0.46 against
-  1.00 is a large gap, and it measures exactly the straight vs
-  curved distinction the hypothesis is about.
-
-## Draft predictions (edit, then commit before running)
-
-1. `orientation_entropy` alone separates fleurs from pink with d′
-   above 0.63, the best color feature.
-2. `fractal_dimension` is the weakest of the four scalar features on
-   fleurs vs pink.
-3. Spatial features also separate pink-ish from winter_minimal,
-   because winter_minimal images have few edges. So the result will
-   not be a clean double dissociation.
-4. Spatial only, multi-seed, fleurs vs pink: above 60% (beats
-   chance). Color + spatial: above the color-only 59.3%, but whether
-   it clears the roughly 70% needed to show that convincingly is
-   uncertain.
 
 ## Beyond this experiment: how much of taste is visual?
 

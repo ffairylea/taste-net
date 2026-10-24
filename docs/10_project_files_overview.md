@@ -110,10 +110,6 @@ came later:
 - `probe_representation.py` runs the kNN, width sweep and per-feature
   d′ checks behind the fleurs experiment (file 15).
 - `predict.py` runs both stages on a single new image.
-- `features_spatial.py`, `check_spatial_features.py`,
-  `measure_spatial_dprime.py` are the next experiment: spatial
-  features, a synthetic sanity check for them, and their d′ on the
-  boards. See `NEXT_EXPERIMENT_SPATIAL_FEATURES.md`.
 
 ## The Phase 1 dependency chain, start to finish
 
