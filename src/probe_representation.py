@@ -197,12 +197,12 @@ def main():
     print(f"""
 kNN on fleurs vs pink peaks at {best_knn:.1%}. kNN has effectively
 unlimited capacity - it memorizes every training point - so if this
-is close to the network's ~62.5%, the limit is in the features and
+is close to the network's 59.3%, the limit is in the features and
 not in the model. If kNN does substantially better, the claim in
 docs/15 is wrong and the network was simply too small or undertrained.
 
 Three-way accuracy peaks at {best_net:.1%} across widths tested. If
-that is close to the 67.3% originally reported at width 8, capacity
+that is close to the 58.8% the default width (8) reaches, capacity
 was not the binding constraint. If it is much higher, docs/15
 overstated its case and should be corrected.
 

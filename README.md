@@ -225,8 +225,12 @@ has no way to say "none of these." Stage 1 supplies that answer.
 - [x] 17 documentation files, worked by hand with real numbers
 - [ ] Spatial features (edge orientation, fractal dimension,
       sharpness, symmetry, coarse layout): do they lift fleurs vs
-      pink above chance where color can't? Plan in
+      pink above chance where color can't? Features implemented
+      and checked on synthetic images; plan in
       `NEXT_EXPERIMENT_SPATIAL_FEATURES.md`.
+- [ ] Self-consistency ceiling: re-label 100 images blind, weeks
+      later. How often I agree with myself caps what any model can
+      reach.
 - [ ] Pretrained vision model comparison: how much of the 59.3% →
       82.5% gap closes when features are learned rather than
       hand-designed?
@@ -291,6 +295,8 @@ python3 train_boards.py           # Phase 2
 python3 compare_optimizers.py     # learning-rate sweep
 python3 probe_representation.py   # kNN, width sweep, d-prime
 python3 predict.py ../image.jpg   # both stages on a new image
+python3 check_spatial_features.py   # next experiment: synthetic check
+python3 measure_spatial_dprime.py   # next experiment: d-prime, no training
 ```
 
 Board images are gitignored. The code is public; the Pinterest
