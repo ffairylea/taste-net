@@ -223,6 +223,10 @@ has no way to say "none of these." Stage 1 supplies that answer.
 - [x] Duplicate contamination found and fixed at the source
 - [x] Dataset rebuilt from Pinterest's official export
 - [x] 17 documentation files, worked by hand with real numbers
+- [ ] Spatial features (edge orientation, fractal dimension,
+      sharpness, symmetry, coarse layout): do they lift fleurs vs
+      pink above chance where color can't? Plan in
+      `NEXT_EXPERIMENT_SPATIAL_FEATURES.md`.
 - [ ] Pretrained vision model comparison: how much of the 59.3% →
       82.5% gap closes when features are learned rather than
       hand-designed?
