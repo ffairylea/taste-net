@@ -2,7 +2,7 @@
 dedupe.py
 
 Finds and removes exact duplicate images in a folder, by comparing
-file content (a hash), not just filename — catches duplicates even
+file content (a hash), not just filename - catches duplicates even
 if they got renamed differently on download (e.g. image.jpg vs
 image(1).jpg).
 

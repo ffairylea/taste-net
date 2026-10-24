@@ -1,4 +1,4 @@
-# 16 — How 68% of the dataset turned out to be duplicates
+# 16: How 68% of the dataset turned out to be duplicates
 
 Every accuracy figure this project reported before August 2026 was
 inflated. The cause was not a bug in the model, the math, or the
@@ -17,8 +17,8 @@ offered was about *one network's behavior*, while the conclusion was
 about the *feature space*. Showing that a particular model fails
 does not show that nothing could succeed.
 
-The direct test is k-nearest-neighbours. kNN fits no parameters — it
-memorizes the entire training set and classifies by proximity — so
+The direct test is k-nearest-neighbors. kNN fits no parameters. It
+memorizes the entire training set and classifies by proximity, so
 it cannot be accused of insufficient capacity. If kNN also fails,
 the information genuinely is not there.
 
@@ -37,7 +37,7 @@ that the features are fine and the network was too small.
 
 1-NN classifies a test point by copying the label of the single
 closest training point. It is the highest-variance classifier
-available — one unlucky neighbor and the answer flips. Averaging
+available: one unlucky neighbor and the answer flips. Averaging
 over 5 neighbors normally *helps*, because it smooths out exactly
 that noise.
 
@@ -71,8 +71,8 @@ left as a note.
 
 Comparing images by content rather than bytes:
 
-1. Convert to greyscale — discard color
-2. Resize to 8×8 = 64 pixels — discard fine detail
+1. Convert to greyscale: discard color
+2. Resize to 8×8 = 64 pixels: discard fine detail
 3. Compare each pixel to the mean of all 64 → one bit each
 4. Two images are near-identical if their 64-bit strings differ in
    only a few positions (Hamming distance ≤ 5)
@@ -82,7 +82,7 @@ its coarse light/dark layout. Shrinking to 64 pixels throws away
 precisely the detail that resolution changes affect, while keeping
 the structure that identifies the image. Two genuinely different
 photographs produce bit strings differing in roughly 32 of 64
-positions — half, as expected by chance.
+positions, half, as expected by chance.
 
 `check_near_duplicates.py` implements this. Validated on six
 deliberately resized copies that MD5 had classified as distinct: all
@@ -114,11 +114,11 @@ Two consequences visible in the original numbers.
 **Apparent overfitting was partly leakage.** The three-way run
 showed 78.9% train against 48.9% test. That looked like a small
 model overfitting a small dataset. On clean data the same
-configuration gives 65.7% train and 66.4% test — a gap of 0.7
+configuration gives 65.7% train and 66.4% test, a gap of 0.7
 points. The gap was contamination, not overfitting.
 
 **The width sweep reversed.** On contaminated data, three-way
-accuracy climbed from 70.8% at 8 hidden units to 95.2% at 128 —
+accuracy climbed from 70.8% at 8 hidden units to 95.2% at 128,
 apparently proving that file 15 was wrong and capacity was the
 binding constraint. On clean data the same sweep is flat: test
 accuracy runs 54.2% to 58.8% across widths 4 to 128, every value
@@ -144,7 +144,7 @@ on scroll, often at whatever resolution suits the current layout.
 Collection therefore worked by scrolling a chunk, running the
 extension, scrolling further, running it again. Each pass captured
 whatever was currently rendered, which heavily overlapped the
-previous pass — at a different resolution, producing different
+previous pass, at a different resolution, producing different
 bytes, defeating hash-based deduplication.
 
 The extension worked correctly. The method was wrong.
@@ -166,7 +166,7 @@ structurally impossible rather than something to detect and remove.**
 
 Near-duplicate rate on the rebuilt dataset: **6.8%**, down from
 67.9%. The residual comes from pins that are genuinely different
-uploads of visually similar images — a real property of the boards
+uploads of visually similar images: a real property of the boards
 rather than an artifact of collection.
 
 The rebuild also fixed a separate problem. The original `data/yes`
@@ -174,7 +174,7 @@ came entirely from the pink board, which meant Phase 1 was arguably
 learning "is this pink" rather than "would this be saved." The
 export allows sampling across all 56 boards, making it the question
 it was supposed to be. Phase 1 accuracy fell from 89.25% to 72.9%
-against a 50% baseline — a lower number measuring a harder and more
+against a 50% baseline. A lower number, measuring a harder and more
 honest question.
 
 ## What this changes about the conclusions
@@ -182,17 +182,17 @@ honest question.
 File 15's central claim survived. On clean data, fleurs versus pink
 runs at 59.3% against a 50% baseline ($z = 1.78$, not statistically
 significant) while pink-ish versus winter_minimal reaches 82.5%
-balanced accuracy — with the same features, same network, same run.
+balanced accuracy, with the same features, same network, same run.
 The width sweep is flat, and the per-feature d′ separation is 1.6×
 larger for the pair that works than for the pair that doesn't.
 Representation, not capacity.
 
-Two honest limits on that. The kNN probe is weaker evidence than it
+Two limits on that. The kNN probe is weaker evidence than it
 first appears: on `pink` vs `winter_minimal` it reaches only 69.0%
 where the network reaches 82.5%, so kNN is not a capacity-unlimited
 *upper bound* on this data, just a differently-shaped classifier
 that happens to be worse at the easy pair too. And the headline
-three-way figure deserves a note of its own — `train_boards.py` at
+three-way figure deserves a note of its own: `train_boards.py` at
 its default split reports 66.4%, while the same architecture across
 five splits in `probe_representation.py` averages 58.8% ±3.4. The
 single-split number is roughly two standard deviations high. The

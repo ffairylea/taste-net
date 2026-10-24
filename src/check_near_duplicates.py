@@ -1,7 +1,7 @@
 """
 check_near_duplicates.py
 
-Tests whether the dataset contains NEAR-duplicates — the same image
+Tests whether the dataset contains NEAR-duplicates - the same image
 at different resolutions, crops, or compression levels.
 
 WHY THIS MATTERS
@@ -19,7 +19,7 @@ The reason to care showed up in `probe_representation.py`:
                           k=15 73.2%
 
 k=1 beating k=5 by 19 points is backwards. 1-NN is the highest
-variance classifier there is — normally it loses to k=5. The only
+variance classifier there is - normally it loses to k=5. The only
 common way it wins by this margin is if nearly every test point has
 an almost identical twin sitting in the training set, in which case
 1-NN just copies that twin's label.
@@ -151,7 +151,7 @@ def main():
         if len({entries[m][0] for m in members}) > 1:
             cross += 1
 
-    print(f"{cross} group(s) span more than one board — those are "
+    print(f"{cross} group(s) span more than one board - those are "
           f"label contradictions, not just redundancy.")
 
     print("\nLargest groups:")

@@ -70,15 +70,15 @@ class TasteNet:
         X, Z1, A1, Z2, A2 = cache
         n = X.shape[0]
 
-        # dLoss/dZ2 — see MATH.md Part 5 for the full derivation.
-        # This is not a shortcut — it's the actual result of
+        # dLoss/dZ2 - see docs/07, Step 1, for the full derivation.
+        # This is not a shortcut - it's the actual result of
         # multiplying cross-entropy's derivative (dL/dŷ) by
         # sigmoid's derivative (dŷ/dZ2), which algebraically cancels
         # down to this simple subtraction. 
         dZ2 = (A2 - y_true).reshape(-1, 1)
 
         # dLoss/dW2 = (what fed into W2) × (how wrong Z2 was).
-        # See MATH.md Part 2/Part 5 — W2's "blame" scales with how
+        # See docs/07, Step 2 - W2's "blame" scales with how
         # much its input (A1) actually contributed.
         dW2 = A1.T @ dZ2 / n
         db2 = dZ2.mean(axis=0)
@@ -89,7 +89,7 @@ class TasteNet:
         dA1 = dZ2 @ self.W2.T
 
         # Multiply by ReLU's derivative: exactly 1 if this neuron
-        # fired (Z1 > 0), exactly 0 if it didn't. See MATH.md Part 3 —
+        # fired (Z1 > 0), exactly 0 if it didn't. See docs/07, Step 3 -
         # this is why a "dead" neuron (Z1 <= 0) gets ZERO gradient
         # here, no partial credit, unlike sigmoid's smooth derivative.
         dZ1 = dA1 * relu_derivative(Z1)
@@ -108,7 +108,7 @@ class TasteNet:
         With optimizer=None this is unchanged: plain gradient
         descent, weight -= lr * gradient. Passing an optimizer from
         optimizers.py swaps in a different update rule while leaving
-        the forward and backward passes completely untouched — the
+        the forward and backward passes completely untouched - the
         gradients are the same, only what's done with them changes.
         """
         y_pred, cache = self.forward(X)
@@ -138,7 +138,7 @@ class TasteNet:
         The mean/std matter as much as the weights. The network was
         trained on z-scored features, so a new image has to be scaled
         by the SAME mean and std to land in the same coordinate
-        system. Saving weights alone makes them unusable on new data —
+        system. Saving weights alone makes them unusable on new data -
         and the tempting shortcut (normalizing one image against its
         own mean/std) produces a vector of zeros every time, which
         fails silently rather than loudly."""

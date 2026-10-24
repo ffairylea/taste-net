@@ -1,4 +1,4 @@
-# taste-net — documentation overview
+# taste-net: documentation overview
 
 This is a small neural network, built entirely from raw numpy (no
 PyTorch, no scikit-learn), trained to predict whether I would save
@@ -7,11 +7,11 @@ an image, using only my own labeled Pinterest data :).
 I built this to actually understand what's happening inside tools
 like sentence-transformers, which I used in an earlier project
 (chaos-organizer) without knowing the math underneath. Every file
-here documents that understanding and explains the processes behind 
+here documents that understanding and explains the processes behind
 the code, worked through with an AI tutor across a lot of sessions,
-by planning, building and asking questions making sure I 
+by planning, building and asking questions making sure I
 understand everything.
 
 # How to read the documentation?
 
-Read the files in 'docs' in order, from 01 to 15.
+Read the files in 'docs' in order, from 00 to 16.

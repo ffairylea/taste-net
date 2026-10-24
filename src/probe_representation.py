@@ -1,7 +1,7 @@
 """
 probe_representation.py
 
-Tests the central claim of docs/15 — that the fleurs/pink failure is
+Tests the central claim of docs/15 - that the fleurs/pink failure is
 a limit of the FEATURES rather than of the model.
 
 The argument in docs/15 is about one network's behavior, but the
@@ -13,7 +13,7 @@ these boards. You haven't shown that nothing could.
 This script runs three checks that address exactly that gap.
 
 1. k-NEAREST NEIGHBOURS on fleurs vs pink.
-   kNN is nonparametric — it fits no weights and has effectively
+   kNN is nonparametric - it fits no weights and has effectively
    unlimited capacity, memorising the entire training set. If a
    method with unlimited capacity ALSO lands near the network's
    62.5%, the ceiling is a property of where the points sit in
@@ -47,11 +47,11 @@ SEEDS = [0, 1, 2, 3, 4]
 
 
 # ---------------------------------------------------------------
-# 1. kNN — capacity-unlimited baseline
+# 1. kNN - capacity-unlimited baseline
 # ---------------------------------------------------------------
 
 def knn_predict(X_train, y_train, X_test, k=5):
-    """Standard k-nearest-neighbours, written out rather than
+    """Standard k-nearest-neighbors, written out rather than
     imported, in keeping with the rest of the project.
 
     For each test point: find the k closest training points by
@@ -99,7 +99,7 @@ def run_knn_pair(X, labels, class_a, class_b, board_names, seeds=SEEDS):
 
 
 # ---------------------------------------------------------------
-# 2. Width sweep — is capacity the limit?
+# 2. Width sweep - is capacity the limit?
 # ---------------------------------------------------------------
 
 def width_sweep(X, Y, labels, widths=(4, 8, 16, 32, 64, 128), seeds=SEEDS):
@@ -140,7 +140,7 @@ def d_prime(x_a, x_b):
 
     d' near 0 means the two groups are indistinguishable on this
     feature. d' around 1 means their means differ by about one
-    standard deviation — visibly separated but overlapping. This is
+    standard deviation - visibly separated but overlapping. This is
     a property of the DATA, computed without training anything."""
     pooled = np.sqrt((x_a.var() + x_b.var()) / 2)
     if pooled == 0:
@@ -196,7 +196,7 @@ def main():
     best_net = max(v[0] for v in widths.values())
     print(f"""
 kNN on fleurs vs pink peaks at {best_knn:.1%}. kNN has effectively
-unlimited capacity — it memorizes every training point — so if this
+unlimited capacity - it memorizes every training point - so if this
 is close to the network's ~62.5%, the limit is in the features and
 not in the model. If kNN does substantially better, the claim in
 docs/15 is wrong and the network was simply too small or undertrained.

@@ -23,7 +23,7 @@ import numpy as np
 
 
 class SGD:
-    """Plain gradient descent — the rule already used in model.py,
+    """Plain gradient descent - the rule already used in model.py,
     wrapped in the same interface so it can be compared fairly.
 
         w <- w - lr * g
@@ -51,7 +51,7 @@ class Momentum:
 
     The problem this solves: gradients computed on data are noisy
     estimates of the true descent direction. Stepping directly on
-    each one produces zigzagging — progress in the consistent
+    each one produces zigzagging - progress in the consistent
     direction, plus random walk in every other direction.
 
     An EMA averages the noise out. Components of the gradient that
@@ -108,7 +108,7 @@ class Adam:
     for that compromise.
 
     THE BIAS CORRECTION. Both m and v start at zero, which is not a
-    neutral starting point — it's an assertion that the gradient is
+    neutral starting point - it's an assertion that the gradient is
     zero, and it takes several steps to wash out. Concretely, with
     b1=0.9 and a constant true gradient g:
 
@@ -128,7 +128,7 @@ class Adam:
     exact algebraic inverse of a known startup bias.
 
     EPSILON. sqrt(v_hat) can be zero (a weight whose gradient has
-    been zero throughout — a permanently dead ReLU, for instance).
+    been zero throughout - a permanently dead ReLU, for instance).
     eps prevents division by zero. It's the same defensive role as
     the std==0 guard in dataset.normalize."""
 
@@ -148,7 +148,7 @@ class Adam:
         self.t += 1
 
         # Precompute the two correction denominators once per step
-        # rather than per parameter — they depend only on t.
+        # rather than per parameter - they depend only on t.
         c1 = 1 - self.beta1 ** self.t
         c2 = 1 - self.beta2 ** self.t
 
@@ -170,7 +170,7 @@ class Adam:
 # Why beta2 = 0.999 rather than 0.9?
 #
 # The second moment is estimating a magnitude, and magnitudes should
-# be stable — the typical size of a weight's gradient shouldn't
+# be stable - the typical size of a weight's gradient shouldn't
 # swing wildly from step to step, or the effective learning rate
 # would jitter. 0.999 averages over roughly the last 1000 steps,
 # which is deliberately much longer than the ~10-step window of the

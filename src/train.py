@@ -19,7 +19,7 @@ def main():
     X, y, paths = build_dataset(yes_dir="../data/yes", no_dir="../data/no")
 
     if len(X) < 20:
-        print("\nNot enough images yet — you need real data in "
+        print("\nNot enough images yet - you need real data in "
               "../data/yes and ../data/no before this will mean anything.")
         return
 
@@ -46,7 +46,7 @@ def main():
 
     print(f"\nFinal train accuracy: {train_acc:.2%}")
     print(f"Final test accuracy:  {test_acc:.2%}")
-    print("(if train >> test accuracy, that's overfitting — the model "
+    print("(if train >> test accuracy, that's overfitting - the model "
           "memorized instead of generalizing. Expected with small data, "
           "worth discussing honestly in your write-up, not hiding.)")
 

@@ -16,7 +16,7 @@ bug that had been silently inflating every number I'd reported.
 ## The experiment
 
 Three boards: `pink`, `winter_minimal`, and `fleurs`. The third was
-chosen to be hard on purpose — most of the flower images *are*
+chosen to be hard on purpose: most of the flower images *are*
 pink, but they belong to a different board, so separating them
 requires something other than color.
 
@@ -31,13 +31,13 @@ any training run. The result, on 137 test images:
 
 **66.4% three-way accuracy** against a 33.3% chance baseline, on the
 single split `train_boards.py` runs by default. Across five splits
-the same architecture averages **58.8% ±3.4** — the default split is
+the same architecture averages **58.8% ±3.4**, so the default split is
 about two standard deviations lucky, and the multi-seed figure is the
 one to trust. The confusion structure below is stable across seeds;
 the headline number is not.
 
-`winter_minimal` was never once classified as `fleurs` — zero times
-out of 46 — while fleurs and pink were confused 23 times, the
+`winter_minimal` was never once classified as `fleurs` (zero times
+out of 46), while fleurs and pink were confused 23 times, the
 dominant error mode.
 
 Splitting the same run in two directions:
@@ -50,25 +50,25 @@ Splitting the same run in two directions:
 Same features, same network, same training run. Capable on one
 question, at chance on the other.
 
-Four of five pre-registered claims held. The fifth — that the
+Four of five pre-registered claims held. The fifth, that the
 fleurs/pink confusion would be strongly *asymmetric*, flowers
-absorbed into the pink board — is not supported: 14 errors one way,
+absorbed into the pink board, is not supported: 14 errors one way,
 9 the other, which is inside chance.
 
 ### Why it isn't the model
 
-- **Capacity:** a width sweep from 4 to 128 hidden units is flat —
+- **Capacity:** a width sweep from 4 to 128 hidden units is flat:
   test accuracy stays between 54.2% and 58.8% across five seeds per
   width, while train accuracy climbs from 63.0% to 91.5%. Extra
   capacity buys memorization, not generalization.
 - **Imbalance:** boards are 228 / 233 / 233.
-- **Optimization:** train 65.7%, test 66.4% — a 0.7 point gap, and
+- **Optimization:** train 65.7%, test 66.4%, a 0.7 point gap, and
   `docs/14` shows optimizer choice moves the binary headline by at
   most two test images.
 - **The features alone:** best d′ separating pink-ish from winter is
   0.88 against 0.63 for fleurs vs pink, and 1.6× on the mean across
-  all 32 features. Measured on the data with no model involved —
-  this is the load-bearing evidence, because nothing is fitted.
+  all 32 features. This is measured on the data with no model
+  involved, which makes it the strongest evidence: nothing is fitted.
 - **Unlimited capacity, with a caveat:** kNN peaks at 64.1% on
   fleurs vs pink. But it only reaches 69.0% on pink vs winter, where
   the network gets 82.5%, so kNN is a weaker classifier here rather
@@ -83,7 +83,7 @@ discarding position before the network sees anything.
 
 The first version of this experiment ran on images scraped with a
 browser extension. A kNN probe returned 97.7% at k=1 but 78.8% at
-k=5 — backwards, since 1-NN is the noisiest classifier there is and
+k=5. That is backwards: 1-NN is the noisiest classifier there is and
 should lose to k=5.
 
 That ordering has one common cause: every test image has a
@@ -93,8 +93,8 @@ generalizes.
 The existing deduplication scripts compared MD5 hashes of file
 bytes, which catches byte-identical files and nothing else. The same
 pin at two resolutions passes as two distinct images. Perceptual
-hashing — greyscale, downsample to 8×8, threshold at the mean, 64
-bits, compare by Hamming distance — found the truth:
+hashing (greyscale, downsample to 8×8, threshold at the mean, 64
+bits, compare by Hamming distance) found the truth:
 
     boards      751 images  ->  67.9% near-duplicate
     yes / no    466 images  ->  43.1% near-duplicate
@@ -132,7 +132,7 @@ to be.
 ## The optimizer benchmark I got wrong
 
 My first comparison reported Adam reaching a loss target in 38
-epochs against SGD's 220 — an apparent 6× speedup. It was invalid:
+epochs against SGD's 220, an apparent 6× speedup. It was invalid:
 the learning rates were arbitrary, and SGD at $lr = 2.0$ reaches the
 same target in 10 epochs, faster than Adam. Comparing two methods at
 one arbitrary hyperparameter each measures the hyperparameters.
@@ -142,8 +142,8 @@ indistinguishable across the three optimizers (75.7% / 72.9% / 68.6%
 for SGD / Momentum / Adam, a range of five test images out of 70),
 but SGD's accuracy swings 11.4 points across learning rates while
 Adam's swings 2.9. Adam's advantage here is robustness to tuning,
-not speed — a smaller claim than the first version implied, and the
-only one that survived the rebuild. Details in `docs/14`.
+not speed. That is a smaller claim than the first version implied,
+and the only one that survived the rebuild. Details in `docs/14`.
 
 Adam also makes the clearest overfitting case in the project: at
 $lr = 0.05$ it reaches 99.6% train accuracy and 68.6% test. On the
@@ -159,7 +159,7 @@ size of the claim, not from spotting the error.
 
 `src/train_boards.py` runs a numerical gradient check when no board
 data is present: nudge a weight by ±h, re-run the loss, compute
-$(L(w+h) - L(w-h))/2h$ — the definition of a derivative, no calculus
+$(L(w+h) - L(w-h))/2h$, the definition of a derivative, no calculus
 involved. Worst disagreement against the analytic gradients: ~7e-12,
 which is float64 noise. Several weights return exactly zero from
 both methods, which is a closed ReLU gate confirmed independently.
@@ -167,7 +167,7 @@ both methods, which is a closed ReLU gate confirmed independently.
 A separate bug worth recording: `train.py` originally saved trained
 weights but discarded the normalization statistics. Since the
 weights were learned in a scaled coordinate system, this made them
-unusable on new images — and the intuitive fix (normalizing a single
+unusable on new images. The intuitive fix (normalizing a single
 image against its own mean and std) produces all zeros, so every
 image maps to the same input and the model returns one constant
 probability. Nothing crashes. Written up in `docs/12`.
@@ -175,7 +175,7 @@ probability. Nothing crashes. Written up in `docs/12`.
 ## What's under the hood
 
 No pretrained embeddings, no CLIP, no transfer learning. Every
-feature is a number computed by hand in `src/features.py` —
+feature is a number computed by hand in `src/features.py`:
 brightness, saturation, contrast, warmth, color variance, three
 average channels, and a 24-bin color histogram. Every step of
 learning is backpropagation and gradient descent written from
@@ -209,7 +209,7 @@ Stage 2 (BoardNet, softmax)     "which board?"
 
 The gate is necessary rather than convenient. Softmax always
 produces a distribution summing to 1, so a board model handed a
-photo of a parking garage will confidently assign it a board — it
+photo of a parking garage will confidently assign it a board. It
 has no way to say "none of these." Stage 1 supplies that answer.
 `src/predict.py` runs the chain on a single new image.
 
@@ -236,7 +236,7 @@ If I train a model only on things I've already chosen, and it
 
 - It might be replaying my existing biases rather than discovering
   anything about aesthetics.
-- Taste might not be a stable target — my saves from six months ago
+- Taste might not be a stable target: my saves from six months ago
   and today may already disagree, appearing as noise the model
   can't fit.
 - Predicting what I'd click is not the same as having taste in the
@@ -244,7 +244,7 @@ If I train a model only on things I've already chosen, and it
   measures the first.
 - Board membership is my own filing decision. Six near-duplicate
   groups span two boards, which is direct evidence that some images
-  legitimately belong to both — an unknown ceiling below 100% that
+  legitimately belong to both. That is an unknown ceiling below 100% that
   has nothing to do with the model.
 - Scaled up, a system that predicts and reinforces individual
   aesthetic preference looks like the mechanism behind algorithmic
@@ -289,7 +289,7 @@ python3 probe_representation.py   # kNN, width sweep, d-prime
 python3 predict.py ../image.jpg   # both stages on a new image
 ```
 
-Board images are gitignored — the code is public, the Pinterest
+Board images are gitignored. The code is public; the Pinterest
 source images stay local.
 
 ## Documentation
@@ -306,5 +306,5 @@ correction to something I had previously reported.
 Part of a pair with
 [chaos-organizer](https://github.com/ffairylea/chaos-organizer):
 that one is the applied side, using existing ML tools to solve a
-workflow problem. This one is the fundamentals side — building the
+workflow problem. This one is the fundamentals side: building the
 machinery to understand what those tools are doing.

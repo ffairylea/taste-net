@@ -9,7 +9,7 @@ WHY THIS SWEEPS LEARNING RATES INSTEAD OF PICKING ONE
 
 The first version of this script compared SGD at lr=0.1 against
 Adam at lr=0.01 and reported that Adam reached a given loss in 38
-epochs versus SGD's 220 — an apparent 6x speedup.
+epochs versus SGD's 220 - an apparent 6x speedup.
 
 That comparison was invalid. The learning rates weren't chosen by
 any fair procedure, and SGD at lr=2.0 turns out to reach the same
@@ -60,7 +60,7 @@ def run(make_optimizer, lr, X_train, y_train, X_test, y_test):
 def epochs_to_reach(losses, target=TARGET_LOSS):
     """Epochs until loss first drops below target. Measures speed of
     getting to a given quality, which is more useful than final loss
-    alone — a method can end up low while taking forever to do it."""
+    alone - a method can end up low while taking forever to do it."""
     below = np.where(losses < target)[0]
     return int(below[0]) + 1 if len(below) else None
 
@@ -167,7 +167,7 @@ def _plot(all_results):
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
     except ImportError:
-        print("(matplotlib not installed — table only. "
+        print("(matplotlib not installed - table only. "
               "pip3 install matplotlib for the plot.)")
         return
 
@@ -187,7 +187,7 @@ def _plot(all_results):
     fig.savefig(out, dpi=150, bbox_inches="tight")
     print(f"Plot saved to {out}")
     print("This plots TRAINING LOSS. The learning-rate sensitivity "
-          "result above\nis about TEST ACCURACY and is not visible here — "
+          "result above\nis about TEST ACCURACY and is not visible here - "
           "don't read it off\nthis figure. What the figure does show: SGD "
           "at lr=1 and lr=2 is\njagged where everything else is smooth "
           "(overshooting), and Adam\nreaches far lower training loss than "

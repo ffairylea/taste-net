@@ -9,7 +9,7 @@ Run from inside src/:
 
 If data/boards/ doesn't exist yet (images not collected), this
 falls back to a SYNTHETIC sanity check instead of dying:
-  1. a numerical gradient check — the same "compute the slope by
+  1. a numerical gradient check - the same "compute the slope by
      nudging a weight and re-running the loss" trick used to verify
      the sigmoid+BCE cancellation, now verifying dZ2 = A2 - Y for
      softmax+CCE. If analytic and numerical gradients match to ~6
@@ -76,7 +76,7 @@ def numerical_gradient_check(seed=0):
                   f"numerical {numerical:+.8f}  diff {diff:.2e}")
 
     print(f"\nWorst disagreement: {worst:.2e} "
-          f"({'PASS' if worst < 1e-6 else 'FAIL'} — should be < 1e-6)")
+          f"({'PASS' if worst < 1e-6 else 'FAIL'} - should be < 1e-6)")
     return worst < 1e-6
 
 
@@ -88,7 +88,7 @@ def synthetic_training_check(seed=0):
     rng = np.random.default_rng(seed)
     n_per_class, n_features, n_classes = 60, 29, 3
 
-    # Feature count here is arbitrary on purpose — the model must
+    # Feature count here is arbitrary on purpose - the model must
     # work for ANY n_features (the real pipeline currently produces
     # 32: 5 stats + 3 avg colors + 24 histogram bins).
     centers = rng.normal(0, 3, size=(n_classes, n_features))
@@ -109,7 +109,7 @@ def synthetic_training_check(seed=0):
 
     acc = (net.predict(X_norm) == labels).mean()
     print(f"\nSynthetic accuracy: {acc:.2%} "
-          f"({'PASS' if acc > 0.95 else 'FAIL'} — separated clusters "
+          f"({'PASS' if acc > 0.95 else 'FAIL'} - separated clusters "
           f"should be nearly perfectly learnable)")
     return acc > 0.95
 
@@ -162,7 +162,7 @@ def main():
     boards_dir = "../data/boards"
 
     if not os.path.isdir(boards_dir):
-        print(f"No {boards_dir}/ yet — running sanity checks on the "
+        print(f"No {boards_dir}/ yet - running sanity checks on the "
               f"code itself instead.\n")
         print("=" * 60)
         print("1. Numerical gradient check (is dZ2 = A2 - Y actually")
@@ -176,11 +176,11 @@ def main():
         ok2 = synthetic_training_check()
         print()
         if ok1 and ok2:
-            print("Both checks PASS — the Stage 2 code is verified "
+            print("Both checks PASS - the Stage 2 code is verified "
                   "correct. Collect board images into "
                   "data/boards/<board_name>/ and rerun.")
         else:
-            print("A check FAILED — there is a bug to find before "
+            print("A check FAILED - there is a bug to find before "
                   "collecting data.")
         return
 
@@ -206,11 +206,11 @@ def main():
     test_acc = (net.predict(X_test_norm) == l_test).mean()
     print(f"\nFinal train accuracy: {train_acc:.2%}")
     print(f"Final test accuracy:  {test_acc:.2%}")
-    # The honest baseline isn't random guessing — it's guessing the
+    # The honest baseline isn't random guessing - it's guessing the
     # LARGEST board every time, which scores higher than 1/n whenever
     # the boards are uneven. Beat that, not the easier number.
     largest = np.bincount(l_test, minlength=n_classes).max() / len(l_test)
-    print(f"(baselines to beat — random guessing: {1/n_classes:.1%}, "
+    print(f"(baselines to beat - random guessing: {1/n_classes:.1%}, "
           f"always guessing the largest board: {largest:.1%})")
 
     print("\nConfusion matrix (rows = true board, cols = predicted):")
@@ -218,7 +218,7 @@ def main():
     print_confusion(M, boards)
 
     net.save("../board_net_weights.npz", mean=mean, std=std)
-    # Save the board order too — the weights are meaningless without
+    # Save the board order too - the weights are meaningless without
     # knowing which output index means which board.
     with open("../board_net_classes.txt", "w") as f:
         f.write("\n".join(boards))

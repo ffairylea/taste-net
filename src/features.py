@@ -1,12 +1,12 @@
 """
 features.py
 
-Turns an image into a feature vector — a list of numbers describing it.
+Turns an image into a feature vector - a list of numbers describing it.
 An image goes from a grid of pixels
 to a single point in N-dimensional space. Everything downstream (the
 model, the math, the learning) happens on these vectors, not on raw
-pixels. Raw pixels would need way more data than we have (150-300
-images) to learn anything real.
+pixels. Raw pixels would need far more data than we have (a few hundred
+images per question) to learn anything real.
 """
 
 from PIL import Image
@@ -24,7 +24,7 @@ def load_image(path, size=(64, 64)):
 
 def average_color(img_array):
     """Mean of R, G, B across the whole image. 3 numbers.
-    This is just an average — sum every pixel's R value, divide by
+    This is just an average - sum every pixel's R value, divide by
     count. Same for G and B."""
     return img_array.mean(axis=(0, 1))  # shape: (3,)
 
