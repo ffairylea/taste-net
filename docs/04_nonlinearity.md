@@ -4,15 +4,6 @@ So far, every neuron just computes a weighted sum: multiply inputs
 by weights, add a bias. Here's why stacking multiple layers of just
 that, with nothing else, doesn't actually gain anything.
 
-## What is ReLU, before the proof below
-
-ReLU stands for "Rectified Linear Unit";
-it's a simple function: ReLU(z) = max(0, z). If z is
-positive, output z unchanged. If z is negative, output 0 instead.
-It's applied to every hidden neuron's
-z value, right after the weighted sum, before passing the result to
-the next layer.
-
 ## The proof: stacking plain weighted sums collapses to one layer
 
 Two layers that are just weighted sums (no ReLU), real numbers:
@@ -30,6 +21,15 @@ This always happens with plain multiplication (and addition, with
 messier algebra): stacking gains nothing if every layer is linear.
 No matter how many layers I stack, if they're all just weighted
 sums, it's mathematically identical to one single layer.
+
+## What is ReLU?
+
+ReLU stands for "Rectified Linear Unit";
+it's a simple function: ReLU(z) = max(0, z). If z is
+positive, output z unchanged. If z is negative, output 0 instead.
+It's applied to every hidden neuron's
+z value, right after the weighted sum, before passing the result to
+the next layer.
 
 ## What ReLU actually breaks, with real numbers
 
@@ -64,8 +64,7 @@ ReLU is applied ONLY to the hidden layer's output (z1), right after
 it's computed, before that result gets passed forward to become the
 output layer's input. It is not applied after the output layer; the
 output layer uses sigmoid instead, a different function with a
-different job (turning the final score into a probability, not
-zeroing out negatives).
+different job (turning the final score into a probability).
 
 So the real sequence, matching the actual network exactly:
 

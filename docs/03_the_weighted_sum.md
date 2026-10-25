@@ -7,7 +7,7 @@ Say for one photo: warmth = 0.6, saturation = 0.2 (simplified to
 just 2 features here, instead of the real 32, to keep this
 readable).
 
-I decide (well, the model eventually learns this, but imagine
+I decide (actually, the model eventually learns this, but imagine
 choosing it manually first): warmth matters a lot and pushes toward
 "yes" → weight it 0.5. Saturation matters less and actually pushes
 toward "no" → weight it -0.3. There's also some fixed baseline lean,
@@ -27,7 +27,7 @@ So 0.34 is the neuron's raw score.
 So z = xW + b is just "multiply each input by its weight, add them
 up, add the bias" & the same recipe can be
 reused for all 32 real features, 8 neurons, ~350 images, and 500
-rounds of training, without rewriting the arithmetic every time.
+rounds of training.
 
 Where do W and b actually come from? They start
 as small random numbers, then get automatically adjusted by training
