@@ -4,6 +4,9 @@
 > the final feature list and the core claim below get fixed and
 > committed, the same way `docs/15` was.
 
+The math behind every feature and threshold here is worked through
+by hand in `docs/17`.
+
 ## The question
 
 Fleurs vs pink sits at 59.3%, not significant. Every one of the 32
@@ -65,9 +68,10 @@ building this.
 4. **Multi-seed numbers,** with fleurs vs pink as the main metric.
    With about 90 test images on that split, the standard error is
    $\sqrt{0.5 \times 0.5 / 90} \approx 5.3$ points. Beating chance
-   needs about 60%. Beating the color-only 59.3% convincingly needs
-   roughly 70%, because the difference between two such estimates
-   has a standard error of about 7.5 points.
+   needs about 60%. Beating the color-only 59.3% convincingly is
+   harder: the difference between two such estimates has a standard
+   error of about 7.3 points, so the conservative bar is about 74%,
+   somewhat lower with a paired test. Worked out in `docs/17`.
 5. **Then the pretrained-CNN comparison** already in the README:
    how much of the gap a learned representation closes beyond
    hand-built spatial features.
