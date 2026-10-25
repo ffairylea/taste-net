@@ -222,7 +222,7 @@ has no way to say "none of these." Stage 1 supplies that answer.
 - [x] Fleurs experiment, prediction committed before results
 - [x] Duplicate contamination found and fixed at the source
 - [x] Dataset rebuilt from Pinterest's official export
-- [x] 17 documentation files, worked by hand with real numbers
+- [x] 18 documentation files, worked by hand with real numbers
 - [ ] Spatial features (edge orientation, fractal dimension,
       sharpness, symmetry, coarse layout): do they lift fleurs vs
       pink above chance where color can't? Plan in
@@ -301,12 +301,13 @@ source images stay local.
 
 ## Documentation
 
-`docs/` contains 17 sequenced files building from "what is a neuron"
+`docs/` contains 18 sequenced files building from "what is a neuron"
 to the duplicate contamination post-mortem, written while learning
 rather than afterward. Derivations are worked by hand with real
 numbers, and places where I was confused or wrong are left visible
 rather than polished away. Files 14, 15 and 16 each contain a
-correction to something I had previously reported.
+correction to something I had previously reported. File 17 is the
+plan for what comes next and the math behind it.
 
 ## Related
 
