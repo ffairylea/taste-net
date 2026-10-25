@@ -20,8 +20,6 @@ that's the one place we need an actual "how confident" number.
 
 ## Where this formula actually comes from (log-odds)
 
-Sigmoid wasn't picked arbitrarily.
-
 Let's start with what's needed: a way to represent a probability p (between
 0 and 1) using a raw score that can be any real number, since
 z = xW+b can come out as anything, positive or negative, huge or tiny.
@@ -101,7 +99,7 @@ So why is sigmoid in my network at all? Only at the output, where two things sav
 
 Sigmoid's flatness is a real defect, but my code just puts it in the one position where it can't do damage.
 
-## Why we'll need this derivative later: the actual reason
+## Why we'll need this derivative later
 
 In the backward pass (file 07), we need to know how loss changes if
 z2 changes, because that tells us how to correct the weights that
@@ -210,7 +208,7 @@ even in a case where intuitively (looking at the huge loss) a bigger
 correction feels warranted. That mismatch (huge loss, but a
 shrunken correction) is exactly the flaw this next part shows how to
 avoid.
-
+                       
 ### The algebraic interaction: why cross-entropy specifically fixes this
 
 This is where the cancellation proof from earlier becomes important. Because I specifically pair sigmoid with
