@@ -12,9 +12,9 @@ these boards. You haven't shown that nothing could.
 
 This script runs three checks that address exactly that gap.
 
-1. k-NEAREST NEIGHBOURS on fleurs vs pink.
+1. k-NEAREST NEIGHBORS on fleurs vs pink.
    kNN is nonparametric - it fits no weights and has effectively
-   unlimited capacity, memorising the entire training set. If a
+   unlimited capacity, memorizing the entire training set. If a
    method with unlimited capacity ALSO lands near the network's
    62.5%, the ceiling is a property of where the points sit in
    feature space, not of the model. That is the difference between
