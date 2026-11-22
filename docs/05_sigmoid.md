@@ -88,22 +88,23 @@ Where the max sits: good. σ'(z) = σ(z)(1−σ(z)) peaks when σ(z) = 0.5, mean
 
 How big the max is: bad. 0.25 is less than 1. Every time a gradient passes back through a sigmoid, it gets multiplied by at most 0.25, usually much less. Stack sigmoid layers and:
 
-0.25²  = 0.0625
-0.25⁵  = 0.00098
-0.25¹⁰ = 0.00000095
-Ten layers and the signal reaching the first layer is about a millionth of what left the last one, and that's the best case, assuming every neuron sits at its optimum. Realistically it's far worse. The early layers effectively stop learning. That's the vanishing gradient problem, and 0.25 is precisely the mechanism.
+    0.25²  = 0.0625
+    0.25⁵  = 0.00098
+    0.25¹⁰ = 0.00000095
+
+Ten layers and the signal reaching the first layer is about a millionth of what left the last one, and that's the best case, assuming every neuron sits at its optimum. Realistically it's far worse. The early layers effectively stop learning. That's the vanishing gradient problem, and the 0.25 ceiling is why it happens.
 
 Compare ReLU: derivative is exactly 1 wherever z > 0. Ten layers gives 1¹⁰ = 1. No shrinkage at all. That's the whole reason model.py uses ReLU in the hidden layer: it doesn't shrink the signal on the way back.
 
 So why is sigmoid in my network at all? Only at the output, where two things save it. It's a single layer, so there's nothing to compound. And the cancellation means σ'(z) doesn't appear in the output gradient anyway. It's ŷ − y, with the derivative already gone.
 
-Sigmoid's flatness is a real defect, but my code just puts it in the one position where it can't do damage.
+So sigmoid's flatness is a real problem in general, but in my network it only sits in the one position where it can't do damage.
 
 ## Why we'll need this derivative later
 
 In the backward pass (file 07), we need to know how loss changes if
 z2 changes, because that tells us how to correct the weights that
-produced z2 are. But loss doesn't touch z2 directly, only through ŷ
+produced z2. But loss doesn't touch z2 directly, only through ŷ
 ("y-hat": the model's predicted probability, its guess, as opposed
 to y, the true label, a known fact) since ŷ = σ(z2). By chain rule,
 this requires knowing how ŷ changes as z2 changes, which is exactly
@@ -211,7 +212,7 @@ avoid.
                        
 ### The algebraic interaction: why cross-entropy specifically fixes this
 
-This is where the cancellation proof from earlier becomes important. Because I specifically pair sigmoid with
+This is where the cancellation (worked through with numbers in file 07) comes in. Because I specifically pair sigmoid with
 cross-entropy loss (not some other loss function), their derivatives
 combine and cancel down to a plain subtraction, ŷ - y, with no
 leftover σ'(z) term at all. The "flat derivative" problem that would

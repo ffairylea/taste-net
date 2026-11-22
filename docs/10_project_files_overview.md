@@ -40,13 +40,13 @@ reference point means testing it on data that doesn't relate to the
 training data the same way anymore, similar to training someone on
 speed limits in km/h then testing them in mph without saying so.
 
-Using training's mean/std on BOTH sets keeps everything on the exact
+Using training's mean/std on both sets keeps everything on the exact
 same scale throughout: a normalized value means the same thing
 whether it came from a training or test image.
 
 There's also a deeper reason this matters: test data exists to
 simulate "brand new images the model has never seen, evaluated
-fairly." Computing statistics FROM the test set to normalize it
+fairly." Computing statistics from the test set to normalize it
 uses information about the test set's own distribution during
 preprocessing, even without touching its labels directly, a subtle
 form of data leakage that could make test accuracy look artificially
@@ -113,7 +113,7 @@ came later:
 
 ## The Phase 1 dependency chain, start to finish
 
-    fetch_unsplash_no.py / manual Pinterest download
+    parse_pinterest_export.py / fetch_unsplash_no.py
               |
               v
         data/yes/, data/no/  (raw images)
@@ -132,9 +132,6 @@ came later:
               |
               v
          train.py  (runs everything, reports results)
-
-
-
 
 
 ## features.py: implementation details
@@ -178,7 +175,7 @@ so `r` becomes a whole 64x64 grid of just red values.
 
 `np.where(mx > 0, (mx-mn)/(mx+1e-8), 0)` is a conditional, computed
 for every pixel at once: IF the max channel value is greater than 0,
-compute the saturation formula; OTHERWISE (a pure black pixel, all
+compute the saturation formula; otherwise (a pure black pixel, all
 channels 0), just use 0, avoiding a divide-by-zero error.
 
 `.mean()` computes saturation for every individual pixel, then

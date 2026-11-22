@@ -174,7 +174,7 @@ than noisy samples. Averaging near-identical values changes almost
 nothing.
 
 Momentum's benefit appears with mini-batches, where each gradient
-comes from a small random subset and is genuinely noisy. The
+comes from a small random subset and is noisy. The
 training setup in this project removes the problem momentum solves.
 
 Worth stating plainly rather than omitting: an implemented technique

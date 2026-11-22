@@ -42,7 +42,7 @@ structure and hash that:
      only a few positions (Hamming distance)
 
 Resizing an image or recompressing it as JPEG barely changes the
-coarse light/dark pattern, so the hash survives. A genuinely
+coarse light/dark pattern, so the hash survives. A really
 different image produces a completely different pattern.
 
 Usage, from inside src/:

@@ -23,7 +23,7 @@ A simpler-seeming option would be mean squared error: L = (ŷ-y)².
 Cross-entropy is used instead because of what log(x) does as x
 approaches 0: it shoots toward negative infinity. With the negative
 sign out front, -log(small number) shoots toward positive infinity:
-meaning this loss punishes CONFIDENT WRONG answers dramatically
+meaning this loss punishes *confident* wrong answers much
 harder than uncertain ones.
 
 Concrete example: say y=1 (true answer is yes), and the model
@@ -38,7 +38,7 @@ Compare to a less confident, still-wrong guess, ŷ=0.3:
 The loss isn't just a little bigger for the more-confident wrong
 answer. It's almost 4x bigger, and the ratio gets more extreme the
 closer ŷ gets to 0. This is a design choice that comes directly from the shape of the log function itself: log
-near zero has an incredibly steep, punishing slope.
+near zero has a very steep slope.
 
 This steep penalty for confident mistakes is specifically what's
 wanted for a yes/no classifier like this one: being very sure and
@@ -56,4 +56,4 @@ Using the running example from earlier files: ŷ ≈ 0.568, y = 1:
 Not near 0 (which would mean a great, confident, correct guess), not
 huge either (which would mean a confident, wrong guess), reflecting
 "reasonable direction, but uncertain, plenty of room to improve."
-This is the exact number the backward pass (file 07) starts from :).
+This is the exact number the backward pass (file 07) starts from.

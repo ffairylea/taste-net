@@ -13,7 +13,7 @@
 Stage 1: existing binary yes/no model (already built): "does this
 match my taste at all."
 
-Stage 2: a SEPARATE model, only trained on/applied to images that
+Stage 2: a separate model, only trained on/applied to images that
 passed Stage 1 as "yes". It asks "given it's a yes, which board
 specifically" (pink vs winter-minimal vs etc.), using softmax across
 just the board classes. Stage 2 never sees "no" images at all.
@@ -46,7 +46,7 @@ for Stage 2, since Stage 1 already handles the yes/no gate.
   to multiple classes)
 - The backward pass derivation: softmax + categorical cross-entropy
   has its own version of the sigmoid+binary-cross-entropy
-  cancellation, same elegant ŷ-y shape, but ŷ and y become whole
+  cancellation, same ŷ-y shape, but ŷ and y become whole
   vectors instead of single numbers. To be derived properly, same
   real-numbers-first style as files 01-09.
 

@@ -2,7 +2,7 @@
 
 This is a small neural network, built entirely from raw NumPy (no
 PyTorch, no scikit-learn), trained to predict whether I would save
-an image, using only my own labeled Pinterest data :).
+an image, using only my own labeled Pinterest data.
 
 I built this to actually understand what's happening inside tools
 like sentence-transformers, which I used in an earlier project

@@ -97,12 +97,11 @@ neuron detect." Either the pattern is present (pass the signal on)
 or it isn't (pass along silence). ReLU encodes exactly that: no such
 thing as negative contribution for one specific narrow pattern.
 
-The neuroplasticity connection :) : this is structurally similar to how
-real neurons work: fire (send a signal, roughly proportional to how
-strongly driven) past a threshold, or stay silent below it. No such
-thing as a real neuron firing "backward." ReLU is a simplified
-cartoon of exactly that idea. Worth being clear about where the
-metaphor breaks though: real neurons integrate signals over time,
-have refractory periods, use different neurotransmitters with
-different effects, nothing as clean as max(0,z). ReLU borrows the
-shape of all-or-nothing, threshold-based firing.
+The neuroscience connection: ReLU looks like a real neuron's firing
+rate plotted against how strongly it is driven. Below a threshold
+the neuron is silent; above it, it fires faster the harder it is
+pushed. Each single spike is all-or-nothing, so it's the rate, not
+the spike, that ReLU resembles. The analogy breaks quickly: real
+neurons integrate input over time, have refractory periods, saturate
+at a maximum rate, and use different neurotransmitters with
+different effects. Nothing about them is as clean as max(0, z).

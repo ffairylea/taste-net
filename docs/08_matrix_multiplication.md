@@ -65,7 +65,7 @@ Same "multiply pairs, sum them" recipe as the single-neuron hand
 example in file 03, just done for 2 images and 2 neurons in one
 shot, instead of one calculation at a time.
 
-# Practically:
+## In model.py
 
 Every step in files 03-07 (z1, a1, z2, ŷ, the backward pass
 gradients) is written in `model.py` using this same matrix form,

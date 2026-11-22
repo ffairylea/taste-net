@@ -2,7 +2,7 @@
 
 Files 01-09 covered binary classification: yes/no, one output
 neuron, sigmoid. This file covers what changes for Phase 2:
-predicting WHICH board an image belongs to, among several options.
+predicting *which* board an image belongs to, among several options.
 
 ## The problem softmax solves
 
@@ -44,7 +44,7 @@ $$\text{softmax}(z_2) = \frac{1.649}{9.406} \approx 0.175$$
 $$\text{softmax}(z_3) = \frac{0.368}{9.406} \approx 0.039$$
 
 Check: $0.786 + 0.175 + 0.039 = 1.000$, exactly what's needed, a
-genuine probability distribution across all boards. Interpretation:
+real probability distribution across all boards. Interpretation:
 78.6% confident pink, 17.5% winter-minimal, 3.9% board 3.
 
 ## Why exponentiate: testing the alternatives
@@ -236,7 +236,7 @@ If the model had been wrong instead, with the true board actually board
 
 $$L = -[0+0+1\times\log(0.039)] = -\log(0.039) \approx 3.24$$
 
-Much bigger loss: the model was 78.6% confident in the WRONG board,
+Much bigger loss: the model was 78.6% confident in the wrong board,
 and log's steep penalty near 0 punishes that confident wrongness
 hard, same property as binary cross-entropy.
 
@@ -266,7 +266,7 @@ Softmax is a generalization of sigmoid; sigmoid is literally what
 softmax reduces to with only 2 classes.
 
 **Case B: $i\ne j$ (how $\hat y_i$ changes with respect to a
-DIFFERENT class's $z_j$)**
+*different* class's $z_j$)**
 
 Same setup, but $e^{z_i}$ doesn't depend on $z_j$ at all, so the
 first term in the product rule vanishes:
@@ -280,7 +280,7 @@ $$\frac{\partial \hat y_i}{\partial z_j} = -\frac{e^{z_i}\times e^{z_j}}{S^2} = 
 
 Makes sense intuitively: since all probabilities must sum to 1, if
 $z_j$ goes up (class $j$ becomes more likely), $\hat y_i$ must go
-DOWN to compensate: less probability mass left for everyone else,
+down to compensate: less probability mass left for everyone else,
 hence the negative sign.
 
 ## Combining with cross-entropy: the full cancellation, term by term

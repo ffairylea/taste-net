@@ -1,21 +1,26 @@
 # Limitations and ideas (my own thinking, not settled answers)
 
 ## The "what to ignore" problem
-My network gives every one of the 32 features constant importance for every image. It can't dynamically decide "ignore saturation, focus on hue" depending on context. This is a real limitation, and it maps to something close to how the brain's reticular activating system filters out irrelevant sensory input to focus attention. Real ML systems address something like this with "attention mechanisms" (the core idea behind transformers). I noticed this gap myself before knowing the term for it.
+
+My network uses the same weights for every image. It can't decide "ignore saturation, focus on hue for this one" depending on the image. In the brain, selective attention does something like this: it boosts the response to some inputs and suppresses others depending on the task. Real ML systems address something similar with "attention mechanisms" (the core idea behind transformers), where how much each input counts is computed from the input itself. I noticed this gap before I knew the term for it.
 
 ## The multi-board question
-**a narrow, visually consistent aesthetic may make this an easier classification problem than 'taste' in general. Worth testing later with a harder, less visually uniform board. (Update: this turned out to be right. When the dataset was rebuilt with "yes" images sampled across all my boards instead of only the pink one, Phase 1 accuracy fell from 89.25% to 72.9%. See docs/16.)
+
+My first "yes" set came only from my pink board. A narrow, visually consistent aesthetic may make this an easier classification problem than "taste" in general. Worth testing later with a less uniform set. (Update: this turned out to be right. When the dataset was rebuilt with "yes" images sampled across all my boards instead of only the pink one, Phase 1 accuracy fell from 89.25% to 72.9%. See docs/16.)
+
 If I expand "yes" into multiple boards (pink, winter-minimal, etc.), the network needs a way to first recognize "this is relevant to some aesthetic I care about" before deciding *which* one, closer to a triage/attention step than a flat yes/no. (Update: Phase 2 built exactly this. Stage 1 decides "would I save this at all", and only then does Stage 2 pick the board. See the README.)
 
 ## Technical limits shape what "taste" the model can even represent
+
 The model's architecture isn't neutral. Every design choice (which
 features I extracted, ReLU vs sigmoid, 8 hidden neurons vs more)
 constrains what kind of pattern it's even capable of finding. This
-connects to the bigger question in the README: if the model "learns
+connects to the questions in the README: if the model "learns
 my taste," it's really learning whatever fits inside these specific
 mathematical constraints, not some pure, architecture-independent
 truth about my aesthetic preferences. A different architecture might
-find a genuinely different notion of "my taste" in the same data.
+find a different notion of "my taste" in the same data.
+
 ## A bug that ran cleanly and produced nothing
 
 `train.py` originally saved the trained weights but discarded the

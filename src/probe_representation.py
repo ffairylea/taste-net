@@ -2,7 +2,7 @@
 probe_representation.py
 
 Tests the central claim of docs/15 - that the fleurs/pink failure is
-a limit of the FEATURES rather than of the model.
+a limit of the features rather than of the model.
 
 The argument in docs/15 is about one network's behavior, but the
 conclusion is about the feature space. Those are different claims. A
@@ -12,20 +12,20 @@ these boards. You haven't shown that nothing could.
 
 This script runs three checks that address exactly that gap.
 
-1. k-NEAREST NEIGHBORS on fleurs vs pink.
-   kNN is nonparametric - it fits no weights and has effectively
-   unlimited capacity, memorizing the entire training set. If a
-   method with unlimited capacity ALSO lands near the network's
-   62.5%, the ceiling is a property of where the points sit in
-   feature space, not of the model. That is the difference between
-   demonstrating the claim and asserting it.
+1. k-nearest neighbors on fleurs vs pink.
+   kNN fits no weights; it memorizes the training set and labels
+   each test image by its closest neighbors. If a model of a
+   completely different kind also fails on fleurs vs pink, that
+   supports the features being the limit. Caveat from the results:
+   kNN is also weaker than the network on pink vs winter, so it is
+   not an upper bound.
 
-2. WIDTH SWEEP on the three-way task.
+2. Width sweep on the three-way task.
    docs/15 originally argued capacity was ruled out because the same
-   network reached 90% on an easier question. That is a non
-   sequitur. This measures directly whether more hidden units help.
+   network reached 90% on an easier question. That doesn't follow.
+   This measures directly whether more hidden units help.
 
-3. PER-FEATURE SEPARATION (d-prime).
+3. Per-feature separation (d-prime).
    For each of the 32 features, how far apart are the fleurs and
    pink distributions, measured in pooled standard deviations?
    Compared against the same statistic for pink-ish vs winter. This
@@ -141,7 +141,7 @@ def d_prime(x_a, x_b):
     d' near 0 means the two groups are indistinguishable on this
     feature. d' around 1 means their means differ by about one
     standard deviation - visibly separated but overlapping. This is
-    a property of the DATA, computed without training anything."""
+    a property of the data, computed without training anything."""
     pooled = np.sqrt((x_a.var() + x_b.var()) / 2)
     if pooled == 0:
         return 0.0
