@@ -17,7 +17,7 @@ computed by hand. Four pixels, RGB values scaled to [0, 1]:
 
     pixel (0,0) = (1.0, 0.0, 0.0)   pure red
     pixel (0,1) = (0.0, 0.0, 1.0)   pure blue
-    pixel (1,0) = (0.5, 0.5, 0.5)   mid grey
+    pixel (1,0) = (0.5, 0.5, 0.5)   mid gray
     pixel (1,1) = (1.0, 1.0, 0.0)   yellow
 
 ### Average color: 3 numbers
@@ -44,19 +44,19 @@ numeric intensity, and an unweighted mean would call them equal.
 
 ### Saturation: 1 number
 
-Per pixel, how far it is from grey, then averaged:
+Per pixel, how far it is from gray, then averaged:
 
     sat = (max(R,G,B) − min(R,G,B)) / max(R,G,B)
 
     pure red:  (1.0 − 0.0) / 1.0 = 1.0
     pure blue: (1.0 − 0.0) / 1.0 = 1.0
-    mid grey:  (0.5 − 0.5) / 0.5 = 0.0
+    mid gray:  (0.5 − 0.5) / 0.5 = 0.0
     yellow:    (1.0 − 0.0) / 1.0 = 1.0
 
     saturation = (1.0 + 1.0 + 0.0 + 1.0) / 4 = 0.75
 
-Grey is the only unsaturated pixel: its channels are all equal, so
-the numerator is zero. That is what "distance from grey" means
+Gray is the only unsaturated pixel: its channels are all equal, so
+the numerator is zero. That is what "distance from gray" means
 arithmetically.
 
 ### Color variance: 1 number
@@ -70,13 +70,13 @@ High means busy and varied; low means flat and minimal.
 
 ### Contrast: 1 number
 
-Convert each pixel to greyscale using the same luminance weights,
+Convert each pixel to grayscale using the same luminance weights,
 then take the standard deviation across pixels:
 
-    grey(0,0) = 0.299(1.0) + 0.587(0.0) + 0.114(0.0) = 0.299
-    grey(0,1) = 0.114
-    grey(1,0) = 0.500
-    grey(1,1) = 0.886
+    gray(0,0) = 0.299(1.0) + 0.587(0.0) + 0.114(0.0) = 0.299
+    gray(0,1) = 0.114
+    gray(1,0) = 0.500
+    gray(1,1) = 0.886
 
     contrast = std([0.299, 0.114, 0.500, 0.886]) = 0.2865
 

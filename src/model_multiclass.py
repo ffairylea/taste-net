@@ -1,7 +1,7 @@
 """
 model_multiclass.py
 
-Stage 2 of the two-stage plan (see PHASE2_MULTIBOARD_PLAN.md):
+Stage 2 of the two-stage plan (see docs/PHASE2_MULTIBOARD_PLAN.md):
 given an image that already passed the yes/no gate, predict WHICH
 board it belongs to. Same skeleton as model.py - the only real
 changes are at the output end:
@@ -28,7 +28,7 @@ def softmax(Z):
         softmax(z_i) = e^z_i / sum_j e^z_j
 
     Sigmoid is literally the 2-class special case of this (derived
-    in PHASE2_MULTIBOARD_PLAN.md).
+    in docs/PHASE2_MULTIBOARD_PLAN.md).
 
     The max-subtraction below is the standard stability trick:
     softmax(z) = softmax(z - c) for any constant c (the e^c cancels
@@ -81,7 +81,7 @@ class BoardNet:
 
     def backward(self, Y_true, cache):
         """Backprop. The headline result (derived in
-        PHASE2_MULTIBOARD_PLAN.md): softmax + categorical
+        docs/PHASE2_MULTIBOARD_PLAN.md): softmax + categorical
         cross-entropy cancels down to
 
             dLoss/dZ2 = A2 - Y_true

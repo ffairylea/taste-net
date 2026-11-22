@@ -35,7 +35,7 @@ HOW PERCEPTUAL HASHING WORKS
 Instead of hashing bytes, reduce the image to its coarse visual
 structure and hash that:
 
-  1. Convert to greyscale (throw away color)
+  1. Convert to grayscale (throw away color)
   2. Resize to 8x8 = 64 pixels (throw away fine detail)
   3. Compare each pixel to the mean -> 64 bits, one per pixel
   4. Two images are near-identical if their bit strings differ in
@@ -168,7 +168,7 @@ INTERPRETATION
 If a substantial fraction of the dataset is near-duplicates, then a
 random train/test split places copies of the same image on both
 sides. Any model with enough capacity can then score highly by
-memorising rather than generalising, and every accuracy figure
+memorizing rather than generalizing, and every accuracy figure
 measured on that split is inflated by an unknown amount.
 
 The correct fix is a GROUP-AWARE split: assign every near-duplicate

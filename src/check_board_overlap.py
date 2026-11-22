@@ -134,7 +134,7 @@ def _resolution_note():
 Note on what this does NOT catch: hashing compares exact bytes, so
 the same pin downloaded at two different resolutions produces two
 different hashes and will pass as distinct images. Catching those
-needs perceptual hashing (comparing downscaled greyscale versions
+needs perceptual hashing (comparing downscaled grayscale versions
 rather than raw bytes), which is a reasonable extension if the
 confusion matrix later shows two boards blending unexpectedly.""")
 

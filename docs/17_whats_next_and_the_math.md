@@ -25,7 +25,7 @@ about how big a result would need to be to count.
 ### The kernel is a weighted sum
 
 An edge is where brightness changes quickly. To find one, slide a
-3×3 grid of weights (a **kernel**) over the greyscale image, and at
+3×3 grid of weights (a **kernel**) over the grayscale image, and at
 each position compute the weighted sum of the 9 pixels underneath.
 That is exactly the operation from file 03, applied to a small patch
 instead of the whole feature vector.
