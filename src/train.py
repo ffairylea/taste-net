@@ -46,9 +46,8 @@ def main():
 
     print(f"\nFinal train accuracy: {train_acc:.2%}")
     print(f"Final test accuracy:  {test_acc:.2%}")
-    print("(if train >> test accuracy, that's overfitting - the model "
-          "memorized instead of generalizing. Expected with small data, "
-          "worth discussing honestly in your write-up, not hiding.)")
+    print("(if train accuracy is much higher than test accuracy, the "
+          "model memorized instead of generalizing)")
 
     # Rough feature importance: average absolute weight magnitude
     # feeding OUT of each input feature, across the hidden layer.

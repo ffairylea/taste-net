@@ -121,8 +121,8 @@ single thing instead of as 5 separate variables.
 
 A tuple is similar to an array/list in that it holds multiple things
 in order, but the difference: arrays/lists are usually meant for
-many items of the SAME kind (like the 32 features, all just
-numbers), while this tuple groups 5 DIFFERENT things together (the
+many items of the *same* kind (like the 32 features, all just
+numbers), while this tuple groups 5 *different* things together (the
 input, two raw scores, two activated outputs) purely so backward()
 can receive all of them at once as one bundle, since it needs every
 one of them to compute gradients.

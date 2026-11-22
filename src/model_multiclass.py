@@ -2,7 +2,7 @@
 model_multiclass.py
 
 Stage 2 of the two-stage plan (see docs/PHASE2_MULTIBOARD_PLAN.md):
-given an image that already passed the yes/no gate, predict WHICH
+given an image that already passed the yes/no gate, predict which
 board it belongs to. Same skeleton as model.py - the only real
 changes are at the output end:
 
@@ -11,9 +11,8 @@ changes are at the output end:
     y as a single 0/1    ->  y as a one-hot vector
 
 Everything else (ReLU hidden layer, the backward pass through W1,
-gradient descent updates) is IDENTICAL to the binary model. That's
-the point worth making in the write-up: multiclass isn't new
-machinery, it's the same machinery with a wider output.
+gradient descent updates) is identical to the binary model. Multiclass isn't new machinery,
+it's the same machinery with a wider output.
 """
 
 import numpy as np

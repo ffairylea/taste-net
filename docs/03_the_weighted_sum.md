@@ -25,13 +25,13 @@ So 0.34 is the neuron's raw score.
 - The result (0.34) = **z** (raw score)
 
 So z = xW + b is just "multiply each input by its weight, add them
-up, add the bias" & the same recipe can be
+up, add the bias", and the same recipe can be
 reused for all 32 real features, 8 neurons, ~350 images, and 500
 rounds of training.
 
 Where do W and b actually come from? They start
 as small random numbers, then get automatically adjusted by training
-(gradient descent, explained later :) based on what reduces error on my real labeled
+(gradient descent, explained in file 07 :) based on what reduces error on my real labeled
 images.
 
 ## Why do we even add a bias?

@@ -19,11 +19,11 @@ My Pinterest saves from six months ago might already disagree with
 saves from today. If so, the model isn't learning one fixed thing
 called "my taste". It's learning some blurred average of a moving
 target, and its errors might partly just be honest noise reflecting
-that I've genuinely changed, not model failure. Worth checking later:
+that I've changed, not model failure. Worth checking later:
 does accuracy improve if I only use recent saves versus my full
 history?
 
-## Preference vs. taste - a distinction I think matters
+## Preference vs. taste: a distinction I think matters
 
 Predicting what I'd click or save is predicting revealed
 preference: a pattern in past behavior. That's not the same as
@@ -49,8 +49,8 @@ their work instrumentally, not neutrally.
 
 This is a toy, transparent, single-user experiment. I know exactly
 what data went in, what the model can and can't do, and I'm the only
-person affected by its output. That's structurally identical, though,
-to a much bigger and less comfortable thing: recommendation systems
+person affected by its output. It has the same basic shape, though,
+as a much bigger and less comfortable thing: recommendation systems
 at real scale (TikTok, Instagram, Pinterest itself) run this same
 basic mechanism (predict and reinforce individual preference), except
 opaque to the user, optimized for engagement rather than
@@ -86,8 +86,7 @@ it correctly generalize to my taste, or does it only work on things
 close to what it already saw? This is actually testable at my
 project's scale (a real experiment, not just a philosophical
 question): feed it unseen images from a different source entirely
-and see what happens. Partial answer, to be filled in once I run it:
-[pending].
+and see what happens. I haven't run this yet.
 
 ### Could something like this "turn bad" without bad input?
 
@@ -105,12 +104,8 @@ develop behavior or internal representations that weren't directly
 specified by training, and whether "accountability" cleanly stays
 with the human designer as systems get more complex) is a real,
 active, unresolved area of AI research (alignment and
-interpretability). It's not something resolvable at my project's
-scale, and it's not something even current professional researchers
-have fully settled either. I don't think it's my place to claim an
-answer here. I think it's worth being honest that the question
-exists, that it's bigger than this project, and that this project is
-the first time it stopped feeling abstract to me.
+interpretability). This project can't answer it, but it was the
+first time the question stopped feeling abstract to me.
 
 ### Can AI have "taste," in any real sense?
 

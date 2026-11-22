@@ -1,6 +1,6 @@
 # 02: Neurons and layers: the basic vocabulary
 
-## Neuron (analogy from neuroscience :)
+## Neuron (the name comes from neuroscience :)
 
 A neuron is the smallest building block in the network. It takes in
 some numbers, computes one weighted sum, applies one activation

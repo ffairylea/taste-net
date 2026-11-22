@@ -12,7 +12,7 @@ and the mistake does not.
 ## The trail
 
 The claim in file 15 is that fleurs and pink cannot be separated by
-color statistics. A reviewer made a fair objection: every argument
+color statistics. There was a fair objection to this: every argument
 offered was about *one network's behavior*, while the conclusion was
 about the *feature space*. Showing that a particular model fails
 does not show that nothing could succeed.
@@ -20,7 +20,9 @@ does not show that nothing could succeed.
 The direct test is k-nearest-neighbors. kNN fits no parameters. It
 memorizes the entire training set and classifies by proximity, so
 it cannot be accused of insufficient capacity. If kNN also fails,
-the information genuinely is not there.
+that is evidence the information is not there. (It later turned out
+kNN is a weaker classifier than the network on these features, so it
+supports the claim rather than proving it; see the README.)
 
 `probe_representation.py` was written to run it. The result:
 
@@ -47,7 +49,7 @@ There is one common way it happens: **every test point has a
 near-identical twin sitting in the training set.** Then 1-NN doesn't
 generalize at all, it retrieves. The nearest neighbor is the same
 image, so the label is guaranteed correct. Adding more neighbors
-brings in genuinely different images and accuracy falls back toward
+brings in different images and accuracy falls back toward
 the honest value.
 
 The 19-point gap was not a result. It was a symptom.
@@ -80,7 +82,7 @@ Comparing images by content rather than bytes:
 The reasoning: resizing or recompressing an image barely disturbs
 its coarse light/dark layout. Shrinking to 64 pixels throws away
 precisely the detail that resolution changes affect, while keeping
-the structure that identifies the image. Two genuinely different
+the structure that identifies the image. Two different
 photographs produce bit strings differing in roughly 32 of 64
 positions, half, as expected by chance.
 
@@ -165,7 +167,7 @@ the same pin overwrites rather than accumulates. **Duplicates become
 structurally impossible rather than something to detect and remove.**
 
 Near-duplicate rate on the rebuilt dataset: **6.8%**, down from
-67.9%. The residual comes from pins that are genuinely different
+67.9%. The residual comes from pins that are actually different
 uploads of visually similar images: a real property of the boards
 rather than an artifact of collection.
 

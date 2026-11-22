@@ -39,7 +39,7 @@ standard luminance weights:
 
 Green is weighted about five times more heavily than blue because
 human vision is far more sensitive to green light. A pure green
-patch genuinely looks brighter than a pure blue one of the same
+patch looks brighter than a pure blue one of the same
 numeric intensity, and an unweighted mean would call them equal.
 
 ### Saturation: 1 number
@@ -136,9 +136,8 @@ just a location in this 32-dimensional space.
 
 ## Why this matters
 
-The entire project rests on one geometric bet: if my real "yes"
-(pink board) images cluster together in one region of this 29D
-space, and "no" images cluster somewhere else, then a model just
+The entire project rests on one geometric bet: if my "yes" images
+cluster together in one region of this 32-dimensional space, and "no" images cluster somewhere else, then a model just
 needs to find a boundary separating those two regions.
 
 Everything in the rest of this documentation (every neuron, every

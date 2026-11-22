@@ -90,7 +90,7 @@ Rule: W ← W - lr × gradient. Using learning rate 0.1:
     W2_new = 0.8 - (0.1)(-0.14688) = 0.81469
     W1_new = [0.5, -0.3] - (0.1)[-0.2074, -0.0691] = [0.5207, -0.2931]
 
-Sanity check: W2 went UP slightly (0.8 → 0.8147). True label was
+Sanity check: W2 went up slightly (0.8 → 0.8147). True label was
 "yes" and the model wasn't confident enough (only 56.8%), so
 increasing W2 pushes future predictions on similar inputs higher,
 exactly the right direction. Both W1 values also shifted in the
@@ -109,7 +109,7 @@ loss calculation, same backward pass, same weight update, just
 scaled up from 1 neuron and 2 toy features to 8 neurons and 32 real
 features, and repeated many times instead of once.
 
-The loss curve I saw when running train.py (starting around 0.86,
-ending near 0.21) is literally thousands of repetitions of the
+The loss curve I saw when running train.py (starting around 0.90,
+ending near 0.54) is literally thousands of repetitions of the
 single correction shown above, each one nudging the weights a tiny
 bit closer to correctly separating my real "yes" and "no" images.

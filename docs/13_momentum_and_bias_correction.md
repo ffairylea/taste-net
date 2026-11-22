@@ -287,11 +287,9 @@ so the divisor approaches 1 and the correction stops changing
 anything, correctly, since the startup bias has washed out by then.
 With $\beta = 0.9$ it is essentially gone within a few dozen steps.
 
-This is the part worth appreciating: it isn't a tuned fudge factor.
+The point is that it isn't a tuned fudge factor.
 The startup error had an exact closed form, so it gets exactly
 undone.
-
-## Adam's second ingredient
 
 ## Adam's second ingredient: a per-weight step size
 
@@ -439,7 +437,7 @@ arbitrary conventions; they are the mean lag of the average being
 computed.
 
 The asymmetry is deliberate. Direction should adapt quickly: when
-the descent direction genuinely changes, the optimizer needs to
+the descent direction really changes, the optimizer needs to
 follow it. Magnitude should adapt slowly, because $\sqrt{\hat v}$
 divides the step, so if it jittered from step to step, the effective
 learning rate would jitter with it and updates would become erratic.

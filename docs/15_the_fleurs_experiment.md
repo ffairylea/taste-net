@@ -31,13 +31,13 @@ been ruled out, so anything the confusion matrix shows is about the
 features, not the file management.
 
 Four overlapping files were found and removed during that check.
-None were real pins — they were Pinterest interface assets
+None were real pins; they were Pinterest interface assets
 (`facebook_share_image.png` and a repeated placeholder) that Imageye
 had scraped alongside the images.
 
 ## Why these three boards specifically
 
-`winter_minimal` is visually distinct from `pink` — different
+`winter_minimal` is visually distinct from `pink`: different
 palette, different brightness, different saturation. Separating
 those two should be well within reach of color-based features.
 
@@ -89,7 +89,7 @@ discarding position entirely.
 
 So a pink flower and a pink bedroom, if their color distributions
 are similar, produce **nearly identical feature vectors**. The model
-is not failing to learn a distinction that is available to it — the
+is not failing to learn a distinction that is available to it. The
 distinction is not present in its input at all.
 
 This is a claim about representation, not about capacity. Adding
@@ -98,8 +98,8 @@ because none of those change what information reaches the network.
 
 ## What each outcome would mean
 
-**If the prediction holds** — fleurs collapses into pink while
-winter_minimal separates cleanly — the experiment demonstrates a
+**If the prediction holds** (fleurs collapses into pink while
+winter_minimal separates cleanly), the experiment demonstrates a
 concrete limit of hand-crafted color features, using this project's
 own data rather than a textbook assertion. It is the empirical case
 for learned features: convolutional layers exist precisely because
@@ -111,7 +111,7 @@ ablation) motivated rather than decorative. A CLIP comparison would
 answer "how much of this gap closes with learned features," which is
 a specific question rather than a vague one.
 
-**If the prediction fails** — fleurs separates well — then something
+**If the prediction fails** (fleurs separates well), then something
 in the color features does correlate with flowers, and the
 interesting work becomes finding out what. Plausible candidates:
 higher `color_variance` from petal-versus-background contrast, more
@@ -127,7 +127,7 @@ color signature that is not the flower itself but its typical
 context.
 
 **If everything fails**, including winter_minimal, the explanation
-is not about fleurs at all and something more basic is wrong —
+is not about fleurs at all and something more basic is wrong:
 class imbalance, a bug in the multiclass pipeline, or boards that
 are less visually distinct than assumed.
 

@@ -104,7 +104,7 @@ def main():
     if delete_from is None:
         print("\nReporting only. To remove them from one board, rerun with:")
         print("    python3 check_board_overlap.py --delete-from <board_name>")
-        print("\nDecide by hand which board each image genuinely belongs to -")
+        print("\nDecide by hand which board each image really belongs to:")
         print("an image saved to two boards may legitimately fit both, which")
         print("is itself worth knowing before treating boards as exclusive.")
         _resolution_note()
