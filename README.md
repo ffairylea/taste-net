@@ -14,7 +14,7 @@ everything again. All numbers below are from the rebuilt data.
 
 This part needs no machine learning background.
 
-I paint, and I save a lot of images on Pinterest, sorted into boards.
+I paint and draw, I love fashion, and I save a lot of images on Pinterest, sorted into boards.
 I wanted to know whether what makes me save an image, and which
 board I put it in, can be measured.
 
