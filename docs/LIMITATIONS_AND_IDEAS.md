@@ -41,5 +41,5 @@ not a fact about this specific mistake. Full working in
 
 `predict.py` now refuses to run against a weights file lacking those
 statistics rather than proceeding on a guess, on the principle that
-when the wrong behaviour is invisible, failing loudly is the only
+when the wrong behavior is invisible, failing loudly is the only
 safe default.

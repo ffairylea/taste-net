@@ -115,7 +115,7 @@ sample size.
 What is large enough to survive is the **spread**. SGD's result
 swings 11.4 points depending on a number that has to be guessed in
 advance (eight test images), while Adam's swings 2.9, which is two.
-Every Adam setting from 0.001 to 0.05 lands in the 65.7–68.6% band.
+Every Adam setting from 0.001 to 0.05 lands in the 65.7% to 68.6% band.
 
 That matches the mechanism derived in file 13. Dividing each step by
 $\sqrt{\hat v}$ gives every weight an effective learning rate scaled
