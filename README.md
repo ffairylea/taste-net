@@ -356,9 +356,9 @@ original plan for the board model, kept as a record), and
 (the plan for the next experiment). `docs/evidence/` holds saved
 output from the gradient check and the optimizer comparison.
 
-**Other files.** `data/yes` and `data/no` are the Phase 1 images,
-included so `train.py` runs straight away. The board images for
-Phase 2 stay on my computer. `board_net_classes.txt` is written by
+**Other files.** `data/no` holds the Unsplash photos used as "no"
+examples. My own Pinterest images (`data/yes` and the Phase 2
+boards) stay on my computer and are not in this repository. `board_net_classes.txt` is written by
 `train_boards.py` and records the board order that `predict.py`
 needs. `requirements.txt` lists the two libraries needed, NumPy and
 Pillow (matplotlib is optional and only draws the optimizer plot).
@@ -421,7 +421,8 @@ pip install -r requirements.txt
 cd src
 ```
 
-Phase 1 runs on the images already in the repo:
+Phase 1 needs your own saved images in `data/yes`; the Unsplash
+"no" set is already in `data/no`:
 
 ```
 python3 train.py                  # Phase 1 yes/no model
@@ -444,14 +445,6 @@ python3 predict.py ../image.jpg       # both stages on a new image
 
 Without board data, `train_boards.py` runs the gradient check
 instead.
-
-## How I made this
-
-I built this to understand what is happening inside tools I had
-used without knowing the math, like the sentence-transformers in
-[chaos-organizer](https://github.com/ffairylea/chaos-organizer).
-I worked through it with an AI tutor over many sessions: planning,
-building, and asking questions until I understood each part.
 
 ## Related
 
