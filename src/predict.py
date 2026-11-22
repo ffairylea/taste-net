@@ -15,7 +15,7 @@ Usage, from inside src/:
     python3 predict.py ../some_image.jpg
     python3 predict.py ../folder_of_images/          (whole folder)
 
-This is where the design decision from PHASE2_MULTIBOARD_PLAN.md
+This is where the design decision from docs/PHASE2_MULTIBOARD_PLAN.md
 becomes visible rather than theoretical: an image rejected at Stage 1
 never reaches Stage 2 at all. The board model is never asked to
 assign a board to something that isn't my taste in the first place -

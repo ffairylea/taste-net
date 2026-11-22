@@ -2,7 +2,7 @@
 dataset_boards.py
 
 Stage 2 data loading. Instead of yes/no folders, each board gets
-its own folder (see PHASE2_MULTIBOARD_PLAN.md):
+its own folder (see docs/PHASE2_MULTIBOARD_PLAN.md):
 
     data/boards/
       pink/

@@ -71,7 +71,7 @@ left as a note.
 
 Comparing images by content rather than bytes:
 
-1. Convert to greyscale: discard color
+1. Convert to grayscale: discard color
 2. Resize to 8×8 = 64 pixels: discard fine detail
 3. Compare each pixel to the mean of all 64 → one bit each
 4. Two images are near-identical if their 64-bit strings differ in
