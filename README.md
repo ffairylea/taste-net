@@ -1,6 +1,6 @@
 # taste-net
 
-A small neural network I wrote from scratch in NumPy and trained on
+A small neural network written from scratch in NumPy and trained on
 my own Pinterest boards, to test one question: **can color alone
 tell apart the images I sort into different boards?**
 
