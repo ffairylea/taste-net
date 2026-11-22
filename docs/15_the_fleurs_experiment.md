@@ -169,7 +169,7 @@ the whole image at once. It examines small patches, one position at
 a time, with the same small grid of weights (a **kernel**) applied
 at every location.
 
-Take a 3×3 patch of a greyscale image sitting on a boundary between
+Take a 3×3 patch of a grayscale image sitting on a boundary between
 dark and bright, such as the edge of a petal against sky:
 
 $$\begin{bmatrix} 10 & 10 & 90 \\ 10 & 10 & 90 \\ 10 & 10 & 90 \end{bmatrix}$$
